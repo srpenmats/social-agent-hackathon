@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social Agent Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg-dark: #0B0F1A;
+        --surface-dark: #131828;
+        --surface-lighter: #1E2538;
+        --border-color: #1F2937;
+        --border-dark: #2D3748;
+        --text-primary: #F3F4F6;
+        --text-secondary: #9CA3AF;
+        --accent-green: #10B981;
+        --primary-accent: #00B894;
+        --accent-red: #EF4444;
+        --danger-accent: #E17055;
+        --accent-yellow: #F59E0B;
+        --brand-tiktok: #EE1D52;
+        --brand-instagram: #E1306C;
+        --brand-x: #1DA1F2;
+        --font-sans: 'Inter', sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+      }
+      body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        margin: 0;
+      }
+      .mono-text {
+        font-family: var(--font-mono);
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scroller::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .scroller::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .scroller::-webkit-scrollbar-thumb {
+        background-color: var(--border-dark);
+        border-radius: 20px;
+      }
+      .glass-card {
+        background-color: var(--surface-dark);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .status-dot {
+        height: 8px;
+        width: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .toggle-checkbox:checked {
+        right: 0;
+        border-color: var(--primary-accent);
+      }
+      .toggle-checkbox:checked + .toggle-label {
+        background-color: var(--primary-accent);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.42.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
