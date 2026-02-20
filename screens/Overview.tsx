@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { RoutePath } from '../App';
-import { DashboardAPI } from '../services/api';
+import { DashboardAPI, ExecutionAPI, ConnectionsAPI, ApiError } from '../services/api';
 
 type Timeframe = '24h' | '7d' | '30d';
 
@@ -13,13 +13,59 @@ export default function Overview({ onNavigate }: OverviewProps) {
   const [killSwitch, setKillSwitch] = useState(false);
   const [timeframe, setTimeframe] = useState<Timeframe>('24h');
   const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [systemStatus, setSystemStatus] = useState<any>(null);
+  const [connections, setConnections] = useState<any[]>([]);
+  const [togglingKill, setTogglingKill] = useState(false);
 
   useEffect(() => {
-    setData(null); // Clear data to show loading spinner on timeframe change
+    setData(null);
+    setError(null);
     DashboardAPI.getOverview(timeframe)
       .then(setData)
-      .catch(console.error);
+      .catch((err) => {
+        setError(err instanceof ApiError ? err.detail : 'Unable to reach backend. Check your connection.');
+      });
   }, [timeframe]);
+
+  useEffect(() => {
+    ExecutionAPI.getStatus()
+      .then((status) => {
+        setSystemStatus(status);
+        setKillSwitch(status.kill_switch_enabled ?? false);
+      })
+      .catch(() => {});
+
+    ConnectionsAPI.getConnections()
+      .then(setConnections)
+      .catch(() => {});
+  }, []);
+
+  const handleKillSwitch = async () => {
+    setTogglingKill(true);
+    try {
+      await ExecutionAPI.setKillSwitch(!killSwitch);
+      setKillSwitch(!killSwitch);
+    } catch {
+      // Revert on failure
+    } finally {
+      setTogglingKill(false);
+    }
+  };
+
+  const connectedCount = connections.filter((c: any) => c.connected).length;
+  const totalPlatforms = connections.length || 3;
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0B0F1A]">
+        <span className="material-symbols-outlined text-5xl text-red-400 mb-4">cloud_off</span>
+        <h2 className="text-xl font-bold text-white mb-2">Connection Error</h2>
+        <p className="text-gray-400 text-sm mb-6 max-w-md text-center">{error}</p>
+        <button onClick={() => { setError(null); setData(null); DashboardAPI.getOverview(timeframe).then(setData).catch((e) => setError(e instanceof ApiError ? e.detail : 'Unable to reach backend.')); }} className="px-6 py-2 bg-[#1E2538] text-white rounded hover:bg-[#2D3748] transition-colors">Retry</button>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -46,15 +92,15 @@ export default function Overview({ onNavigate }: OverviewProps) {
         </nav>
         <div className="flex items-center gap-4">
           <div className="flex bg-[#131828] rounded-lg p-1 border border-[#1F2937]">
-            <button 
+            <button
               onClick={() => setTimeframe('24h')}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${timeframe === '24h' ? 'bg-[#1F2937] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
             >24h</button>
-            <button 
+            <button
               onClick={() => setTimeframe('7d')}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${timeframe === '7d' ? 'bg-[#1F2937] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
             >7d</button>
-            <button 
+            <button
               onClick={() => setTimeframe('30d')}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${timeframe === '30d' ? 'bg-[#1F2937] text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
             >30d</button>
@@ -88,15 +134,15 @@ export default function Overview({ onNavigate }: OverviewProps) {
               </div>
             </div>
           ))}
-          
+
           <div className="bg-[#131828] border border-[#1F2937] rounded-xl p-5 shadow-sm">
             <div className="flex justify-between items-start mb-2">
               <span className="text-sm text-gray-400 font-medium">Active Platforms</span>
               <span className="material-symbols-outlined text-gray-500 text-[20px]">layers</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-white">3/3</span>
-              <span className="text-xs text-gray-500">All Systems Go</span>
+              <span className="text-2xl font-bold text-white">{connectedCount}/{totalPlatforms}</span>
+              <span className="text-xs text-gray-500">{connectedCount === totalPlatforms ? 'All Systems Go' : 'Some Disconnected'}</span>
             </div>
             <div className="flex gap-2 mt-4">
               <div className="w-2 h-2 rounded-full bg-[#EE1D52]"></div>
@@ -113,8 +159,8 @@ export default function Overview({ onNavigate }: OverviewProps) {
               <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Platform Health</h3>
               <div className="grid grid-cols-3 gap-4">
                 {data.platformHealth.map((plat: any, i: number) => (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     onClick={() => onNavigate(plat.route as RoutePath)}
                     className={`bg-[#131828] border border-[#1F2937] rounded-lg p-4 flex flex-col gap-3 transition-colors cursor-pointer group ${plat.hoverBorder}`}
                   >
@@ -173,7 +219,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="time" stroke="#4B5563" fontSize={10} tickLine={false} axisLine={false} />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', fontSize: '12px' }}
                       itemStyle={{ color: '#fff' }}
                     />
@@ -198,23 +244,23 @@ export default function Overview({ onNavigate }: OverviewProps) {
                   </div>
                   <div>
                     <div className="text-white font-medium text-sm">{killSwitch ? 'Agent Halted' : 'Agent Running'}</div>
-                    <div className="text-gray-500 text-xs">Uptime: 4d 12h</div>
+                    <div className="text-gray-500 text-xs">Uptime: {systemStatus?.uptime ?? '--'}</div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-xs">
                   <span className="text-gray-400">Discovery Latency</span>
-                  <span className="text-white font-mono">240ms</span>
+                  <span className="text-white font-mono">{systemStatus?.discovery_latency_ms != null ? `${systemStatus.discovery_latency_ms}ms` : '--'}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-gray-400">Queue Depth</span>
-                  <span className="text-white font-mono">12 items</span>
+                  <span className="text-white font-mono">{systemStatus?.queue_depth ?? '--'} items</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-gray-400">API Health</span>
-                  <span className={`${killSwitch ? 'text-red-500' : 'text-[#10B981]'} font-mono`}>{killSwitch ? '0%' : '100%'}</span>
+                  <span className={`${killSwitch ? 'text-red-500' : 'text-[#10B981]'} font-mono`}>{killSwitch ? '0%' : (systemStatus?.api_health ?? '--')}</span>
                 </div>
               </div>
 
@@ -225,7 +271,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                     <div className="text-gray-500 text-[10px]">Stop all posting immediately</div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={killSwitch} onChange={() => setKillSwitch(!killSwitch)} />
+                    <input type="checkbox" className="sr-only peer" checked={killSwitch} disabled={togglingKill} onChange={handleKillSwitch} />
                     <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#EF4444]"></div>
                   </label>
                 </div>

@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { HubAPI } from '../services/api';
+import { HubAPI, ApiError } from '../services/api';
 
 export default function XHub() {
   const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    HubAPI.getStats('x').then(setData).catch(console.error);
+    HubAPI.getStats('x')
+      .then(setData)
+      .catch((err) => {
+        setError(err instanceof ApiError ? err.detail : 'Failed to load X data.');
+      });
   }, []);
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0B0F1A]">
+        <span className="text-5xl font-bold text-[#1DA1F2] mb-4">X</span>
+        <h2 className="text-xl font-bold text-white mb-2">X Data Unavailable</h2>
+        <p className="text-gray-400 text-sm mb-6 max-w-md text-center">{error}</p>
+        <p className="text-gray-500 text-xs">Connect X in Settings to see data.</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -22,7 +38,7 @@ export default function XHub() {
       <header className="h-20 px-8 border-b border-[#1F2937] bg-gradient-to-r from-[#131828] to-[#0B0F1A] flex items-center justify-between shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-[#1DA1F2]/10 to-transparent pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#1DA1F2]/50 to-transparent"></div>
-        
+
         <div className="flex items-center gap-4 z-10">
           <div className="w-12 h-12 rounded-xl bg-black border border-[#1F2937] flex items-center justify-center shadow-[0_0_15px_rgba(29,161,242,0.2)]">
             <span className="text-white text-3xl font-bold font-sans">X</span>
@@ -64,7 +80,7 @@ export default function XHub() {
               <span className="material-symbols-outlined text-gray-400">filter_list</span>
             </div>
             <div className="flex-1 p-4 overflow-y-auto scroller space-y-4">
-              {data.keywords.map((stream: any, i: number) => (
+              {data.keywords && data.keywords.length > 0 ? data.keywords.map((stream: any, i: number) => (
                 <div key={i} className="p-4 border border-[#2D3748] rounded-lg bg-[#0B0F1A] hover:border-[#1DA1F2]/50 transition-colors cursor-pointer">
                   <div className="flex justify-between items-start mb-2">
                     <span className="font-mono text-sm text-[#1DA1F2]">{stream.term}</span>
@@ -75,7 +91,12 @@ export default function XHub() {
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Active Stream • Volume: {stream.volume}
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <span className="material-symbols-outlined text-4xl mb-2">search_off</span>
+                  <p className="text-sm">No keyword streams configured yet.</p>
+                </div>
+              )}
             </div>
            </div>
 
@@ -86,14 +107,16 @@ export default function XHub() {
                  <span className="material-symbols-outlined text-yellow-500 text-[18px]">warning</span>
                  High-Risk Drafts
               </h3>
-              <button className="text-xs bg-[#1DA1F2]/20 text-[#1DA1F2] px-2 py-1 rounded font-medium">Review All ({data.drafts.length})</button>
+              {data.drafts && data.drafts.length > 0 && (
+                <button className="text-xs bg-[#1DA1F2]/20 text-[#1DA1F2] px-2 py-1 rounded font-medium">Review All ({data.drafts.length})</button>
+              )}
             </div>
             <div className="flex-1 p-0 overflow-y-auto scroller divide-y divide-[#2D3748]">
-              {data.drafts.map((item: any, i: number) => (
+              {data.drafts && data.drafts.length > 0 ? data.drafts.map((item: any, i: number) => (
                 <div key={i} className="p-5 bg-[#0B0F1A] hover:bg-[#131828] transition-colors">
                   <div className="text-xs text-gray-500 mb-2">Replying to <span className="text-[#1DA1F2]">{item.user}</span></div>
                   <p className="text-sm text-gray-300 mb-3">"{item.msg}"</p>
-                  
+
                   <div className="relative">
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 rounded-l"></div>
                     <div className="bg-[#1E2538] p-3 pl-4 rounded rounded-l-none border border-[#2D3748] border-l-0">
@@ -101,14 +124,19 @@ export default function XHub() {
                       <p className="text-sm text-white">"{item.draft}"</p>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3 flex gap-2">
                     <button className="flex-1 py-1.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 rounded text-xs font-medium hover:bg-[#10B981]/20">Approve</button>
                     <button className="flex-1 py-1.5 bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 rounded text-xs font-medium hover:bg-[#EF4444]/20">Reject</button>
                     <button className="px-3 py-1.5 bg-[#2D3748] text-white rounded text-xs font-medium hover:bg-[#394559] material-symbols-outlined text-[14px]">edit</button>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <span className="material-symbols-outlined text-4xl mb-2">drafts</span>
+                  <p className="text-sm">No drafts pending review.</p>
+                </div>
+              )}
             </div>
            </div>
         </div>

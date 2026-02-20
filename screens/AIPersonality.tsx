@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { PersonaAPI } from '../services/api';
+import { PersonaAPI, ApiError } from '../services/api';
 import { generatePersonaConfig } from '../services/ai';
 
 export default function AIPersonality() {
   const [personas, setPersonas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [error, setError] = useState<string | null>(null);
+
   const [isCreating, setIsCreating] = useState(false);
   const [activePersonaId, setActivePersonaId] = useState<string | null>(null);
-  
+
   // Creation States
   const [isUploading, setIsUploading] = useState(false);
   const [tempFiles, setTempFiles] = useState<any[]>([]);
@@ -23,11 +24,12 @@ export default function AIPersonality() {
   }, []);
 
   const fetchPersonas = async () => {
+    setError(null);
     try {
       const data = await PersonaAPI.getPersonas();
       setPersonas(data);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof ApiError ? e.detail : 'Failed to load personas.');
     } finally {
       setIsLoading(false);
     }
@@ -37,31 +39,36 @@ export default function AIPersonality() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsUploading(true);
+    // Extract dropped files
+    const files = Array.from(e.dataTransfer.files);
     setTimeout(() => {
       setIsUploading(false);
-      setTempFiles([...tempFiles, {
-        name: 'new_brand_guidelines_2024.pdf',
-        modified: 'Just now', size: '2.4 MB', type: 'pdf',
-        content: "Our brand voice is extremely professional, highly educational, and focuses on long-term wealth building without giving specific financial advice. We use data to back up our claims."
-      }]);
-    }, 1000);
+      const newFiles = files.map(f => ({
+        name: f.name,
+        modified: 'Just now',
+        size: `${(f.size / 1024).toFixed(0)} KB`,
+        type: f.name.split('.').pop() || 'pdf',
+        content: '' // Content will be read by backend
+      }));
+      setTempFiles([...tempFiles, ...newFiles]);
+    }, 500);
   };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      // Aggregate text from uploaded files
-      const documentContext = tempFiles.map(f => f.content).join('\n\n');
-      
-      // Call Gemini SDK to parse documents and return structured JSON
+      // Aggregate text from uploaded files (backend processes the actual files)
+      const documentContext = tempFiles.map(f => f.content || f.name).join('\n\n');
+
+      // Call backend via ai.ts wrapper
       const config = await generatePersonaConfig(documentContext);
-      
+
       setGeneratedIdentity(config.coreIdentity || '');
       setGeneratedModifiers(config.toneModifiers || '');
     } catch (error) {
       console.error("Failed to generate config", error);
-      setGeneratedIdentity("Fallback: Professional educator.");
-      setGeneratedModifiers("- Approachable\n- Professional");
+      setGeneratedIdentity("Generation failed. Please configure manually.");
+      setGeneratedModifiers("- Configure tone modifiers manually");
     } finally {
       setIsGenerating(false);
     }
@@ -89,8 +96,8 @@ export default function AIPersonality() {
         temperature: 0.5,
         files: tempFiles
       };
-      
-      const saved = await PersonaAPI.savePersona(newPersona);
+
+      const saved = await PersonaAPI.createPersona(newPersona);
       setPersonas([saved, ...personas]);
       setIsCreating(false);
       setActivePersonaId(saved.id);
@@ -98,6 +105,17 @@ export default function AIPersonality() {
       console.error(e);
     }
   };
+
+  if (error && personas.length === 0) {
+    return (
+      <div className="flex-1 bg-[#0B0F1A] flex flex-col items-center justify-center">
+        <span className="material-symbols-outlined text-5xl text-red-400 mb-4">error_outline</span>
+        <h2 className="text-xl font-bold text-white mb-2">Personas Unavailable</h2>
+        <p className="text-gray-400 text-sm mb-6 max-w-md text-center">{error}</p>
+        <button onClick={fetchPersonas} className="px-6 py-2 bg-[#1E2538] text-white rounded hover:bg-[#2D3748] transition-colors">Retry</button>
+      </div>
+    );
+  }
 
   if (isLoading) return <div className="flex-1 bg-[#0B0F1A] flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#F59E0B] border-t-transparent rounded-full animate-spin"></div></div>;
 
@@ -111,7 +129,7 @@ export default function AIPersonality() {
           </h1>
           <p className="text-sm text-gray-400">Manage the personalities, guardrails, and knowledge bases driving your agents.</p>
         </div>
-        <button 
+        <button
           onClick={startCreate}
           className="px-4 py-2 bg-[#F59E0B] hover:bg-[#d98b09] text-black rounded-lg text-sm font-bold transition-colors shadow-lg shadow-[#F59E0B]/20 flex items-center gap-2"
         >
@@ -123,9 +141,14 @@ export default function AIPersonality() {
         {/* Left Sidebar */}
         <div className="w-80 border-r border-[#1F2937] bg-[#0B0F1A] flex flex-col z-10">
           <div className="flex-1 overflow-y-auto scroller p-3 space-y-2">
-            {personas.map((p) => (
-              <div 
-                key={p.id} 
+            {personas.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <span className="material-symbols-outlined text-3xl mb-2">person_off</span>
+                <p className="text-xs text-center">No personas yet. Create one to get started.</p>
+              </div>
+            ) : personas.map((p) => (
+              <div
+                key={p.id}
                 onClick={() => { setIsCreating(false); setActivePersonaId(p.id); }}
                 className={`p-3 border rounded-lg cursor-pointer transition-colors relative ${activePersonaId === p.id ? 'bg-[#1E2538] border-[#F59E0B]' : 'bg-[#131828] border-[#2D3748] hover:border-gray-500'}`}
               >
@@ -146,7 +169,7 @@ export default function AIPersonality() {
                 {/* File Upload Zone */}
                 <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748]">
                   <h3 className="text-sm font-semibold text-white mb-4">Upload Context Files</h3>
-                  <div 
+                  <div
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     className="border-2 border-dashed border-[#2D3748] hover:border-[#F59E0B] bg-[#0B0F1A] rounded-xl p-8 flex flex-col items-center justify-center transition-colors cursor-pointer group"
@@ -169,17 +192,17 @@ export default function AIPersonality() {
                   {tempFiles.length > 0 && !generatedIdentity && (
                     <button onClick={handleGenerate} disabled={isGenerating} className="mt-6 px-6 py-3 bg-[#F59E0B] text-black rounded-lg font-bold w-full flex items-center justify-center gap-2">
                       {isGenerating ? <span className="material-symbols-outlined animate-spin">autorenew</span> : <span className="material-symbols-outlined">auto_awesome</span>}
-                      Generate Config via Gemini
+                      Generate Config via AI
                     </button>
                   )}
                 </div>
 
-                {/* Gemini Output */}
+                {/* AI Output */}
                 {generatedIdentity && (
                   <div className="bg-[#131828] border border-[#F59E0B]/50 rounded-xl overflow-hidden animate-in slide-in-from-bottom-4">
                      <div className="px-6 py-4 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20 flex items-center gap-2">
                        <span className="material-symbols-outlined text-[#F59E0B]">auto_awesome</span>
-                       <h3 className="font-semibold text-[#F59E0B]">Gemini Generated Configuration</h3>
+                       <h3 className="font-semibold text-[#F59E0B]">AI Generated Configuration</h3>
                      </div>
                      <div className="p-6 grid grid-cols-2 gap-6">
                         <div>

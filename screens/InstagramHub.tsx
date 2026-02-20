@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { HubAPI } from '../services/api';
+import { HubAPI, ApiError } from '../services/api';
 
 export default function InstagramHub() {
   const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    HubAPI.getStats('instagram').then(setData).catch(console.error);
+    HubAPI.getStats('instagram')
+      .then(setData)
+      .catch((err) => {
+        setError(err instanceof ApiError ? err.detail : 'Failed to load Instagram data.');
+      });
   }, []);
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0B0F1A]">
+        <span className="material-symbols-outlined text-5xl text-[#E1306C] mb-4">no_photography</span>
+        <h2 className="text-xl font-bold text-white mb-2">Instagram Data Unavailable</h2>
+        <p className="text-gray-400 text-sm mb-6 max-w-md text-center">{error}</p>
+        <p className="text-gray-500 text-xs">Connect Instagram in Settings to see data.</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -22,7 +38,7 @@ export default function InstagramHub() {
       <header className="h-20 px-8 border-b border-[#1F2937] bg-gradient-to-r from-[#131828] to-[#0B0F1A] flex items-center justify-between shrink-0 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-[#E1306C]/10 to-transparent pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#f09433]/50 via-[#E1306C]/50 to-[#bc1888]/50"></div>
-        
+
         <div className="flex items-center gap-4 z-10">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center shadow-[0_0_15px_rgba(225,48,108,0.3)]">
             <span className="material-symbols-outlined text-3xl text-white">photo_camera</span>
@@ -63,7 +79,7 @@ export default function InstagramHub() {
               <h3 className="font-semibold text-white">Top Performing Content</h3>
             </div>
             <div className="p-4 grid grid-cols-2 gap-4 flex-1 overflow-y-auto scroller">
-              {data.topContent.map((item: any, i: number) => (
+              {data.topContent && data.topContent.length > 0 ? data.topContent.map((item: any, i: number) => (
                 <div key={i} className="relative group cursor-pointer">
                   <div className="aspect-[4/5] rounded-lg bg-gray-800 overflow-hidden border border-[#2D3748] group-hover:border-[#E1306C] transition-colors relative">
                     <img src={item.img} alt="post" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -75,7 +91,12 @@ export default function InstagramHub() {
                     </span>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-2 flex flex-col items-center justify-center py-8 text-gray-500">
+                  <span className="material-symbols-outlined text-3xl mb-2">image</span>
+                  <p className="text-xs text-center">No content data yet.</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -91,7 +112,7 @@ export default function InstagramHub() {
               </div>
             </div>
             <div className="p-4 space-y-4 overflow-y-auto scroller flex-1 bg-[#0B0F1A]/50">
-               {data.feed.map((interaction: any, i: number) => (
+              {data.feed && data.feed.length > 0 ? data.feed.map((interaction: any, i: number) => (
                 <div key={i} className="p-4 bg-[#1E2538]/50 rounded-xl border border-[#2D3748]">
                   <div className="flex items-center gap-3 mb-3 pb-3 border-b border-[#2D3748]">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f09433] to-[#E1306C] p-[2px]">
@@ -112,7 +133,12 @@ export default function InstagramHub() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <span className="material-symbols-outlined text-4xl mb-2">inbox</span>
+                  <p className="text-sm">No activity yet. Comments will appear here as the agent operates.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

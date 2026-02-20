@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { HubAPI } from '../services/api';
+import { HubAPI, ApiError } from '../services/api';
 
 export default function TikTokHub() {
   const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    HubAPI.getStats('tiktok').then(setData).catch(console.error);
+    HubAPI.getStats('tiktok')
+      .then(setData)
+      .catch((err) => {
+        setError(err instanceof ApiError ? err.detail : 'Failed to load TikTok data.');
+      });
   }, []);
+
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0B0F1A]">
+        <span className="material-symbols-outlined text-5xl text-[#EE1D52] mb-4">music_off</span>
+        <h2 className="text-xl font-bold text-white mb-2">TikTok Data Unavailable</h2>
+        <p className="text-gray-400 text-sm mb-6 max-w-md text-center">{error}</p>
+        <p className="text-gray-500 text-xs">Connect TikTok in Settings to see data.</p>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -60,7 +76,7 @@ export default function TikTokHub() {
               </div>
             </div>
             <div className="p-4 space-y-4 overflow-y-auto scroller flex-1 bg-[#0B0F1A]/50">
-              {data.feed.map((item: any, i: number) => (
+              {data.feed && data.feed.length > 0 ? data.feed.map((item: any, i: number) => (
                 <div key={i} className="p-4 bg-[#131828] rounded-xl border border-[#2D3748] flex gap-4">
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
@@ -75,7 +91,12 @@ export default function TikTokHub() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                  <span className="material-symbols-outlined text-4xl mb-2">inbox</span>
+                  <p className="text-sm">No activity yet. Comments will appear here as the agent operates.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
