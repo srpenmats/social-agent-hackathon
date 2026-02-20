@@ -11,7 +11,10 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from supabase import Client
+try:
+    from supabase import Client
+except ImportError:
+    Client = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 

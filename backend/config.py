@@ -1,10 +1,17 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_backend_dir = Path(__file__).resolve().parent
+_env_files = [_backend_dir / ".env", Path.cwd() / ".env"]
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=[str(f) for f in _env_files],
+        env_file_encoding="utf-8",
+    )
 
     # Supabase
     supabase_url: str

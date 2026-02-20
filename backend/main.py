@@ -18,7 +18,11 @@ from backend.routers import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_clients()
+    try:
+        init_clients()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"DB init skipped: {e}")
     yield
 
 

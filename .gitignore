@@ -7,10 +7,28 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node
 node_modules
 dist
 dist-ssr
 *.local
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+*.egg
+
+# Environment / secrets
+.env
+backend/.env
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +40,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Misc
+PLAN*.md
+*.pyc
