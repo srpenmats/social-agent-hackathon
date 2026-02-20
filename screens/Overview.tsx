@@ -196,7 +196,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                   <p className="text-xs text-gray-500">Comments posted over the selected timeframe</p>
                 </div>
                 <div className="flex gap-4 text-xs">
-                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#EE1D52]"></span><span className="text-gray-400">TikTok</span></div>
+                  <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#D1D5DB]"></span><span className="text-gray-400">TikTok</span></div>
                   <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#E1306C]"></span><span className="text-gray-400">Instagram</span></div>
                   <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#1DA1F2]"></span><span className="text-gray-400">X</span></div>
                 </div>
@@ -206,8 +206,8 @@ export default function Overview({ onNavigate }: OverviewProps) {
                   <AreaChart data={data.chart} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorTiktok" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EE1D52" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#EE1D52" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#D1D5DB" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#D1D5DB" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorIg" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#E1306C" stopOpacity={0.3}/>
@@ -223,7 +223,7 @@ export default function Overview({ onNavigate }: OverviewProps) {
                       contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', fontSize: '12px' }}
                       itemStyle={{ color: '#fff' }}
                     />
-                    <Area type="monotone" dataKey="tiktok" stroke="#EE1D52" strokeWidth={2} fillOpacity={1} fill="url(#colorTiktok)" />
+                    <Area type="monotone" dataKey="tiktok" stroke="#D1D5DB" strokeWidth={2} fillOpacity={1} fill="url(#colorTiktok)" />
                     <Area type="monotone" dataKey="instagram" stroke="#E1306C" strokeWidth={2} fillOpacity={1} fill="url(#colorIg)" />
                     <Area type="monotone" dataKey="x" stroke="#1DA1F2" strokeWidth={2} fillOpacity={1} fill="url(#colorX)" />
                   </AreaChart>

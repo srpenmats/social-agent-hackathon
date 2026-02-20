@@ -20,15 +20,27 @@ router = APIRouter(prefix="/api/v1/settings", tags=["settings"])
 
 # --- API Keys ---
 
+_KNOWN_PROVIDERS = [
+    {"provider": "anthropic", "name": "Anthropic (Claude)", "icon": "psychology"},
+    {"provider": "openai", "name": "OpenAI", "icon": "auto_awesome"},
+    {"provider": "gemini", "name": "Google Gemini", "icon": "stars"},
+    {"provider": "serper", "name": "Serper (Search)", "icon": "search"},
+]
+
+
 @router.get("/api-keys")
 async def get_api_keys(user: dict = require_role("admin")):
     db = get_supabase_admin()
     result = db.table("system_config").select("key, value").eq("key", "api_keys").execute()
-    if not result.data:
-        return {"keys": {}}
-    keys = result.data[0].get("value", {})
-    masked = {k: f"****{v[-4:]}" if isinstance(v, str) and len(v) > 4 else "****" for k, v in keys.items()}
-    return {"keys": masked}
+    stored = result.data[0].get("value", {}) if result.data else {}
+
+    items = []
+    for p in _KNOWN_PROVIDERS:
+        raw = stored.get(p["provider"], "")
+        connected = bool(raw)
+        masked = f"****{raw[-4:]}" if isinstance(raw, str) and len(raw) > 4 else None
+        items.append({**p, "connected": connected, "masked_key": masked})
+    return items
 
 
 @router.put("/api-keys")

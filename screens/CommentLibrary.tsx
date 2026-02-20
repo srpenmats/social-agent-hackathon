@@ -15,11 +15,25 @@ export default function CommentLibrary() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await CommentsAPI.getComments({
+      const resp = await CommentsAPI.getComments({
         category: category !== 'All' ? category : undefined,
         search: search || undefined,
       });
-      setSnippets(data);
+      // API returns { items: [...], total, page, limit }
+      const items = Array.isArray(resp) ? resp : (resp as any).items ?? [];
+      // Map backend fields to what the UI expects
+      const mapped = items.map((c: any) => ({
+        id: c.id,
+        text: c.comment_text || c.text || '',
+        category: c.approval_path === 'auto' ? 'Engagement' : c.approval_path === 'human' ? 'Support' : 'Education',
+        tags: [c.platform, c.status].filter(Boolean),
+        uses: c.likes || 0,
+        avgLikes: c.likes || 0,
+        platform: c.platform,
+        riskScore: c.risk_score,
+        postedAt: c.posted_at,
+      }));
+      setSnippets(mapped);
     } catch (e) {
       setError(e instanceof ApiError ? e.detail : 'Failed to load comment library.');
     } finally {

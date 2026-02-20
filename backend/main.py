@@ -11,6 +11,7 @@ from backend.routers import (
     dashboard,
     execution,
     neoclaw,
+    personas,
     review,
     settings,
 )
@@ -41,6 +42,7 @@ app.include_router(settings.router)
 app.include_router(connections.router)
 app.include_router(execution.router)
 app.include_router(neoclaw.router)
+app.include_router(personas.router)
 
 
 @app.get("/api/v1/health")

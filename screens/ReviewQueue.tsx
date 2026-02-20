@@ -1,34 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { ReviewAPI, PersonaAPI, ApiError } from '../services/api';
-import { draftComment } from '../services/ai';
+import { ReviewAPI, ApiError } from '../services/api';
 
 export default function ReviewQueue() {
   const [queue, setQueue] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Gemini State
   const [draftedText, setDraftedText] = useState('');
-  const [isDrafting, setIsDrafting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
 
-  // Active persona (fetched from backend)
-  const [personaIdentity, setPersonaIdentity] = useState('');
-  const [personaRules, setPersonaRules] = useState<string[]>([]);
-
   useEffect(() => {
-    // Fetch the active persona for drafting context
-    PersonaAPI.getPersonas()
-      .then((personas) => {
-        const active = personas.find((p: any) => p.active) || personas[0];
-        if (active) {
-          setPersonaIdentity(active.coreIdentity || '');
-          setPersonaRules(active.rules || []);
-        }
-      })
-      .catch(() => {});
-
     loadQueue();
   }, []);
 
@@ -37,14 +18,10 @@ export default function ReviewQueue() {
     setError(null);
     try {
       const resp = await ReviewAPI.getQueue();
-      // API returns { items: [...], pending_count, ... }
       const items = Array.isArray(resp) ? resp : (resp as any).items ?? [];
       setQueue(items);
       setCurrentIndex(0);
-      if (items.length > 0) {
-        const ctx = items[0].video_context?.description || items[0].proposed_text || '';
-        generateDraft(ctx);
-      }
+      setDraftedText(items.length > 0 ? items[0].proposed_text || '' : '');
     } catch (e) {
       setError(e instanceof ApiError ? e.detail : 'Failed to load review queue.');
     } finally {
@@ -52,39 +29,17 @@ export default function ReviewQueue() {
     }
   };
 
-  const generateDraft = async (postContext: string) => {
-    // Use the proposed_text from backend as the draft — no external AI call needed
-    const item = queue[currentIndex];
-    if (item?.proposed_text) {
-      setDraftedText(item.proposed_text);
-      return;
-    }
-    setIsDrafting(true);
-    setDraftedText('');
-    try {
-      const draft = await draftComment(postContext, personaIdentity, personaRules);
-      setDraftedText(draft);
-    } catch (e) {
-      setDraftedText("Error generating draft. Please write manually.");
-    } finally {
-      setIsDrafting(false);
-    }
-  };
-
   const handleResolve = async (action: 'approve' | 'reject' | 'edit') => {
     if (!currentItem || isResolving) return;
     setIsResolving(true);
-
     try {
       await ReviewAPI.decide(currentItem.id, action, draftedText);
-      // Move to next item
       if (currentIndex < queue.length - 1) {
         const nextIdx = currentIndex + 1;
         setCurrentIndex(nextIdx);
-        const ctx = queue[nextIdx].video_context?.description || queue[nextIdx].proposed_text || '';
-        generateDraft(ctx);
+        setDraftedText(queue[nextIdx].proposed_text || '');
       } else {
-        setQueue([]); // Queue empty
+        setQueue([]);
       }
     } catch (e) {
       console.error("Failed to resolve item", e);
@@ -196,42 +151,32 @@ export default function ReviewQueue() {
 
                 <div className="flex-1 mb-8 flex flex-col relative">
                   <label className="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Proposed Response</label>
-
-                  {isDrafting ? (
-                    <div className="flex-1 bg-[#0B0F1A] border border-[#2D3748] rounded-xl flex items-center justify-center p-4">
-                      <div className="flex items-center gap-3 text-gray-400">
-                        <span className="material-symbols-outlined animate-spin text-teal-500">autorenew</span>
-                        <span className="text-sm">AI is drafting a response...</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative flex-1">
-                      <textarea
-                        className="w-full h-full min-h-[140px] bg-[#0B0F1A] border border-[#2D3748] rounded-xl p-4 text-gray-100 text-lg leading-relaxed focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none resize-none transition-all shadow-inner"
-                        spellCheck="false"
-                        value={draftedText}
-                        onChange={(e) => setDraftedText(e.target.value)}
-                      />
-                      <div className="absolute bottom-4 right-4 text-xs text-gray-500 font-mono">{draftedText.length} chars</div>
-                    </div>
-                  )}
+                  <div className="relative flex-1">
+                    <textarea
+                      className="w-full h-full min-h-[140px] bg-[#0B0F1A] border border-[#2D3748] rounded-xl p-4 text-gray-100 text-lg leading-relaxed focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none resize-none transition-all shadow-inner"
+                      spellCheck="false"
+                      value={draftedText}
+                      onChange={(e) => setDraftedText(e.target.value)}
+                    />
+                    <div className="absolute bottom-4 right-4 text-xs text-gray-500 font-mono">{draftedText.length} chars</div>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-4 mt-auto">
                   <button
-                    disabled={isResolving || isDrafting}
+                    disabled={isResolving}
                     onClick={() => handleResolve('reject')}
                     className="flex-1 h-12 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 text-red-400 border border-red-500/30 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium">
                     Reject
                   </button>
                   <button
-                    disabled={isResolving || isDrafting}
+                    disabled={isResolving}
                     onClick={() => handleResolve('edit')}
                     className="flex-1 h-12 bg-[#1E2538] hover:bg-[#2D3748] disabled:opacity-50 text-white border border-[#2D3748] rounded-lg flex items-center justify-center gap-2 transition-colors font-medium">
                     Edit
                   </button>
                   <button
-                    disabled={isResolving || isDrafting}
+                    disabled={isResolving}
                     onClick={() => handleResolve('approve')}
                     className="flex-1 h-12 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium shadow-lg shadow-teal-500/20">
                     Approve
@@ -242,7 +187,6 @@ export default function ReviewQueue() {
           </div>
         </div>
 
-        {/* Sidebar placeholder for Recent Decisions */}
         <div className="col-span-3 border-l border-[#2D3748] bg-[#0f1420] p-6 hidden lg:flex flex-col">
           <h3 className="text-sm font-semibold text-gray-300 mb-6 uppercase tracking-wider">Queue Progress</h3>
           <div className="text-gray-500 text-sm">
