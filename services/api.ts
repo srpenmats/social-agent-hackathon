@@ -55,7 +55,7 @@ export const DashboardAPI = {
     apiFetch<any>(`/dashboard/overview?timeframe=${timeframe}`),
 
   getPlatformStats: (platform: string) =>
-    apiFetch<any>(`/dashboard/platforms/${platform}`),
+    apiFetch<any>(`/dashboard/${platform}`),
 };
 
 // --- Review Queue ---
@@ -248,10 +248,10 @@ export const SettingsAPI = {
 
 export const AnalyticsAPI = {
   getEngagementTimeline: (timeframe: '24h' | '7d' | '30d') =>
-    apiFetch<any>(`/analytics/engagement?timeframe=${timeframe}`),
+    apiFetch<any>(`/analytics/engagement-timeline?timeframe=${timeframe}`),
 
   getHashtagPerformance: () =>
-    apiFetch<any[]>('/analytics/hashtags'),
+    apiFetch<any[]>('/analytics/hashtag-performance'),
 };
 
 // --- Execution ---

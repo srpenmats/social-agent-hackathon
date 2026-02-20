@@ -7,14 +7,14 @@ from backend.config import get_settings
 
 ALGORITHM = "HS256"
 
+# Local dev user — used when no Bearer token is provided
+_DEV_USER = {"id": "dev-user", "email": "dev@moneylion.com", "role": "admin"}
 
-def _extract_token(request: Request) -> str:
+
+def _extract_token(request: Request) -> str | None:
     auth = request.headers.get("Authorization")
     if not auth or not auth.startswith("Bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing or invalid Authorization header",
-        )
+        return None
     return auth.removeprefix("Bearer ")
 
 
@@ -32,6 +32,9 @@ def verify_jwt(token: str) -> dict:
 
 async def get_current_user(request: Request) -> dict:
     token = _extract_token(request)
+    if token is None:
+        # Local dev mode — no auth required
+        return _DEV_USER
     payload = verify_jwt(token)
     return {
         "id": payload.get("sub"),

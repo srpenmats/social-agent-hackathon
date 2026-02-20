@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { RoutePath } from '../App';
+import { ReviewAPI } from '../services/api';
 
 interface SidebarProps {
   currentRoute: RoutePath;
@@ -7,6 +8,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentRoute, onNavigate }: SidebarProps) {
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    ReviewAPI.getQueue()
+      .then((data: any) => setPendingCount(data.pending_count ?? data.items?.length ?? 0))
+      .catch(() => {});
+  }, [currentRoute]);
   const navItemClass = (path: RoutePath) => `
     flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors group cursor-pointer
     ${currentRoute === path 
@@ -59,7 +67,7 @@ export default function Sidebar({ currentRoute, onNavigate }: SidebarProps) {
               <span className="material-symbols-outlined text-[20px] overflow-hidden whitespace-nowrap">rate_review</span>
               Review Queue
             </div>
-            <span className="bg-[#EF4444] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">14</span>
+            {pendingCount > 0 && <span className="bg-[#EF4444] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{pendingCount}</span>}
           </div>
         </nav>
       </div>

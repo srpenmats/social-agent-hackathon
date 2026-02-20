@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class PlatformConnectionResponse(BaseModel):
     platform: str
     status: str = "disconnected"
+    connected: bool = False
     auth_method: str | None = None
     account_info: dict[str, Any] | None = None
     session_health: str | None = None

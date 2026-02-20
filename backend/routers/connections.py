@@ -23,6 +23,7 @@ async def list_connections(user: dict = require_role("admin")):
         PlatformConnectionResponse(
             platform=r["name"],
             status=r.get("status", "disconnected"),
+            connected=r.get("status") == "connected",
             auth_method=r.get("auth_method"),
             session_health=r.get("session_health"),
             workers_status=r.get("workers_status"),

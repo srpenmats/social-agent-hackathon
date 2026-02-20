@@ -36,11 +36,14 @@ export default function ReviewQueue() {
     setIsLoading(true);
     setError(null);
     try {
-      const items = await ReviewAPI.getQueue();
+      const resp = await ReviewAPI.getQueue();
+      // API returns { items: [...], pending_count, ... }
+      const items = Array.isArray(resp) ? resp : (resp as any).items ?? [];
       setQueue(items);
       setCurrentIndex(0);
       if (items.length > 0) {
-        generateDraft(items[0].postContext);
+        const ctx = items[0].video_context?.description || items[0].proposed_text || '';
+        generateDraft(ctx);
       }
     } catch (e) {
       setError(e instanceof ApiError ? e.detail : 'Failed to load review queue.');
@@ -50,6 +53,12 @@ export default function ReviewQueue() {
   };
 
   const generateDraft = async (postContext: string) => {
+    // Use the proposed_text from backend as the draft — no external AI call needed
+    const item = queue[currentIndex];
+    if (item?.proposed_text) {
+      setDraftedText(item.proposed_text);
+      return;
+    }
     setIsDrafting(true);
     setDraftedText('');
     try {
@@ -72,7 +81,8 @@ export default function ReviewQueue() {
       if (currentIndex < queue.length - 1) {
         const nextIdx = currentIndex + 1;
         setCurrentIndex(nextIdx);
-        generateDraft(queue[nextIdx].postContext);
+        const ctx = queue[nextIdx].video_context?.description || queue[nextIdx].proposed_text || '';
+        generateDraft(ctx);
       } else {
         setQueue([]); // Queue empty
       }
@@ -141,17 +151,21 @@ export default function ReviewQueue() {
               <div className="w-full md:w-[380px] bg-black relative flex flex-col border-r border-[#2D3748]">
                 <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-sm border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
                   <span className="material-symbols-outlined text-xs text-white">public</span>
-                  <span className="text-xs font-semibold text-white">{currentItem.platform}</span>
+                  <span className="text-xs font-semibold text-white capitalize">{currentItem.classification || 'general'}</span>
                 </div>
 
-                <div className="flex-1 bg-gray-900 relative overflow-hidden flex flex-col">
-                  <img alt="Content thumbnail" className="w-full h-full object-cover opacity-80" src={currentItem.thumbnail}/>
+                <div className="flex-1 bg-gray-900 relative overflow-hidden flex flex-col items-center justify-center">
+                  <div className="text-6xl mb-4 opacity-40">
+                    {currentItem.video_context?.video_url?.includes('tiktok') ? '🎵' : currentItem.video_context?.video_url?.includes('instagram') ? '📸' : '🐦'}
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
                     <div className="flex items-center gap-2 mb-2">
-                      <img className="w-6 h-6 rounded-full border border-white/20" src={currentItem.avatar} alt="Avatar"/>
-                      <span className="text-xs text-gray-300 font-medium">{currentItem.user}</span>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white">
+                        {(currentItem.video_context?.creator || '?')[0]}
+                      </div>
+                      <span className="text-xs text-gray-300 font-medium">{currentItem.video_context?.creator || 'Unknown'}</span>
                     </div>
-                    <p className="text-sm text-white line-clamp-3">{currentItem.postContext}</p>
+                    <p className="text-sm text-white line-clamp-3">{currentItem.video_context?.description || 'No context available'}</p>
                   </div>
                 </div>
               </div>
@@ -167,13 +181,15 @@ export default function ReviewQueue() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 bg-[#0B0F1A] border border-[#00B894] rounded-lg p-2 pr-4 shadow-sm">
-                    <div className="w-10 h-10 rounded-full border-4 border-[#00B894] flex items-center justify-center text-[#00B894] font-bold text-sm">
-                      {currentItem.riskScore}
+                  <div className={`flex items-center gap-3 bg-[#0B0F1A] border rounded-lg p-2 pr-4 shadow-sm ${(currentItem.risk_score ?? 0) > 50 ? 'border-[#EF4444]' : (currentItem.risk_score ?? 0) > 30 ? 'border-[#F59E0B]' : 'border-[#00B894]'}`}>
+                    <div className={`w-10 h-10 rounded-full border-4 flex items-center justify-center font-bold text-sm ${(currentItem.risk_score ?? 0) > 50 ? 'border-[#EF4444] text-[#EF4444]' : (currentItem.risk_score ?? 0) > 30 ? 'border-[#F59E0B] text-[#F59E0B]' : 'border-[#00B894] text-[#00B894]'}`}>
+                      {currentItem.risk_score ?? 0}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[#00B894] text-xs font-bold uppercase tracking-wider">{currentItem.riskLabel}</span>
-                      <span className="text-[10px] text-gray-400">Score: {currentItem.riskScore}/100</span>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${(currentItem.risk_score ?? 0) > 50 ? 'text-[#EF4444]' : (currentItem.risk_score ?? 0) > 30 ? 'text-[#F59E0B]' : 'text-[#00B894]'}`}>
+                        {(currentItem.risk_score ?? 0) > 50 ? 'High Risk' : (currentItem.risk_score ?? 0) > 30 ? 'Medium Risk' : 'Low Risk'}
+                      </span>
+                      <span className="text-[10px] text-gray-400">Score: {currentItem.risk_score ?? 0}/100</span>
                     </div>
                   </div>
                 </div>
