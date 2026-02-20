@@ -1,17 +1,107 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HubAPI, ApiError } from '../services/api';
+
+const API_BASE = 'http://localhost:8000/api/v1';
+
+const decideDraft = async (reviewId: number, decision: 'approve' | 'reject', editedText?: string) => {
+  const token = localStorage.getItem('auth_token');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const body: Record<string, string> = { decision };
+  if (editedText !== undefined) body.edited_text = editedText;
+
+  const resp = await fetch(`${API_BASE}/review/${reviewId}/decide`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const detail = await resp.text().catch(() => 'Unknown error');
+    throw new Error(`Failed to decide: ${detail}`);
+  }
+  return resp.json();
+};
 
 export default function XHub() {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editText, setEditText] = useState('');
+
+  const fetchData = useCallback(async () => {
+    try {
+      const result = await HubAPI.getStats('x');
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.detail : 'Failed to load X data.');
+    }
+  }, []);
 
   useEffect(() => {
-    HubAPI.getStats('x')
-      .then(setData)
-      .catch((err) => {
-        setError(err instanceof ApiError ? err.detail : 'Failed to load X data.');
-      });
-  }, []);
+    fetchData();
+  }, [fetchData]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetch(`${API_BASE}/hubs/x/sync`, { method: 'POST' });
+    } catch (e) {
+      console.warn('Sync request failed, reloading cached data:', e);
+    }
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  const handleApprove = async (item: any) => {
+    try {
+      await decideDraft(item.id, 'approve');
+      setData((prev: any) => ({
+        ...prev,
+        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
+      }));
+    } catch (e) {
+      console.error('Failed to approve draft:', e);
+    }
+  };
+
+  const handleReject = async (item: any) => {
+    try {
+      await decideDraft(item.id, 'reject');
+      setData((prev: any) => ({
+        ...prev,
+        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
+      }));
+    } catch (e) {
+      console.error('Failed to reject draft:', e);
+    }
+  };
+
+  const handleEdit = (item: any) => {
+    setEditingId(item.id);
+    setEditText(item.draft);
+  };
+
+  const handleSaveEdit = async (item: any) => {
+    try {
+      await decideDraft(item.id, 'approve', editText);
+      setData((prev: any) => ({
+        ...prev,
+        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
+      }));
+      setEditingId(null);
+      setEditText('');
+    } catch (e) {
+      console.error('Failed to save edited draft:', e);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditText('');
+  };
 
   if (error) {
     return (
@@ -45,12 +135,21 @@ export default function XHub() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-              X Command Hub
+              Cash Kitty Command Hub
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30 uppercase tracking-wider">Active</span>
             </h1>
-            <p className="text-sm text-gray-400">Monitoring mentions, industry keywords, and thread engagements.</p>
+            <p className="text-sm text-gray-400">Autonomous social engagement powered by NeoClaw</p>
           </div>
         </div>
+
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="z-10 flex items-center gap-2 px-4 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 rounded-lg text-sm font-medium hover:bg-[#1DA1F2]/20 transition-colors disabled:opacity-50"
+        >
+          <span className={`material-symbols-outlined text-[18px] ${refreshing ? 'animate-spin' : ''}`}>refresh</span>
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </header>
 
       <div className="flex-1 overflow-y-auto p-8 scroller flex flex-col gap-8">
@@ -113,23 +212,83 @@ export default function XHub() {
             </div>
             <div className="flex-1 p-0 overflow-y-auto scroller divide-y divide-[#2D3748]">
               {data.drafts && data.drafts.length > 0 ? data.drafts.map((item: any, i: number) => (
-                <div key={i} className="p-5 bg-[#0B0F1A] hover:bg-[#131828] transition-colors">
-                  <div className="text-xs text-gray-500 mb-2">Replying to <span className="text-[#1DA1F2]">{item.user}</span></div>
+                <div key={item.id ?? i} className="p-5 bg-[#0B0F1A] hover:bg-[#131828] transition-colors">
+                  <div className="text-xs text-gray-500 mb-2 flex items-center gap-1 flex-wrap">
+                    <span>Replying to</span>
+                    {item.tweet_url ? (
+                      <a href={item.tweet_url} target="_blank" rel="noopener noreferrer" className="text-[#1DA1F2] hover:underline inline-flex items-center gap-1">
+                        {item.user}
+                        <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                      </a>
+                    ) : (
+                      <span className="text-[#1DA1F2]">{item.user}</span>
+                    )}
+                    {item.risk_score != null && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                        Risk: {item.risk_score}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-300 mb-3">"{item.msg}"</p>
 
-                  <div className="relative">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 rounded-l"></div>
-                    <div className="bg-[#1E2538] p-3 pl-4 rounded rounded-l-none border border-[#2D3748] border-l-0">
-                      <div className="text-[10px] font-bold text-yellow-500 mb-1 uppercase">Draft Response (Needs Approval)</div>
-                      <p className="text-sm text-white">"{item.draft}"</p>
+                  {editingId === item.id ? (
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1DA1F2] rounded-l"></div>
+                        <textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          className="w-full bg-[#1E2538] text-white text-sm p-3 pl-4 rounded rounded-l-none border border-[#2D3748] border-l-0 resize-none focus:outline-none focus:border-[#1DA1F2]/50"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleSaveEdit(item)}
+                          className="flex-1 py-1.5 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 rounded text-xs font-medium hover:bg-[#1DA1F2]/20"
+                        >
+                          Save & Approve
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="px-3 py-1.5 bg-[#2D3748] text-gray-400 rounded text-xs font-medium hover:bg-[#394559]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500 rounded-l"></div>
+                        <div className="bg-[#1E2538] p-3 pl-4 rounded rounded-l-none border border-[#2D3748] border-l-0">
+                          <div className="text-[10px] font-bold text-yellow-500 mb-1 uppercase">Draft Response (Needs Approval)</div>
+                          <p className="text-sm text-white">"{item.draft}"</p>
+                        </div>
+                      </div>
 
-                  <div className="mt-3 flex gap-2">
-                    <button className="flex-1 py-1.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 rounded text-xs font-medium hover:bg-[#10B981]/20">Approve</button>
-                    <button className="flex-1 py-1.5 bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 rounded text-xs font-medium hover:bg-[#EF4444]/20">Reject</button>
-                    <button className="px-3 py-1.5 bg-[#2D3748] text-white rounded text-xs font-medium hover:bg-[#394559] material-symbols-outlined text-[14px]">edit</button>
-                  </div>
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          onClick={() => handleApprove(item)}
+                          className="flex-1 py-1.5 bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/30 rounded text-xs font-medium hover:bg-[#10B981]/20"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleReject(item)}
+                          className="flex-1 py-1.5 bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 rounded text-xs font-medium hover:bg-[#EF4444]/20"
+                        >
+                          Reject
+                        </button>
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="px-3 py-1.5 bg-[#2D3748] text-white rounded text-xs font-medium hover:bg-[#394559] material-symbols-outlined text-[14px]"
+                        >
+                          edit
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )) : (
                 <div className="flex flex-col items-center justify-center py-16 text-gray-500">

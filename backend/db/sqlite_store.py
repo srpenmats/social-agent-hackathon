@@ -10,7 +10,7 @@ import json
 import sqlite3
 import threading
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -438,7 +438,7 @@ def init_sqlite_db() -> None:
 
 
 def _seed_demo_data(conn: sqlite3.Connection) -> None:
-    """Insert realistic demo data for the hackathon dashboard."""
+    """Seed minimal config data. Real content comes from sync scripts."""
     now = datetime.now(timezone.utc).isoformat()
 
     # Platforms
@@ -466,106 +466,6 @@ def _seed_demo_data(conn: sqlite3.Connection) -> None:
     conn.execute(
         'INSERT INTO risk_config (auto_approve_max, review_max, blocklist, override_rules) VALUES (?, ?, ?, ?)',
         (30, 65, json.dumps({"financial_claims": ["guaranteed", "free money"], "political": ["vote", "election"]}), json.dumps([])),
-    )
-
-    # Discovered videos with demo data
-    import random
-    platforms = ["tiktok", "tiktok", "tiktok", "instagram", "instagram", "x", "x", "x"]
-    creators = ["@savvysaver", "@budgettips", "@financefun", "@moneytalks", "@creditwise", "@taxhacks", "@sidehustle", "@investbro"]
-    descriptions = [
-        "How I saved $10k in 6 months with this budgeting hack 💰",
-        "Stop making these 3 credit card mistakes right now",
-        "POV: you finally check your credit score after avoiding it",
-        "The 50/30/20 rule actually works if you do it right",
-        "Why nobody talks about high-yield savings accounts",
-        "Tax season tips that saved me $2000 last year",
-        "Side hustles that actually make real money in 2026",
-        "My investment portfolio at 25 vs 30 - the difference is wild",
-    ]
-    hashtags_list = [
-        ["#money", "#budgeting", "#savingmoney"],
-        ["#creditcard", "#finance", "#personalfinance"],
-        ["#creditscore", "#financetok", "#moneytok"],
-        ["#budgeting", "#5030/20rule", "#moneytips"],
-        ["#savings", "#hysa", "#financetips"],
-        ["#taxes", "#taxtips", "#money"],
-        ["#sidehustle", "#makemoney", "#entrepreneur"],
-        ["#investing", "#portfolio", "#stocks"],
-    ]
-    classifications = ["finance-educational", "finance-educational", "cultural-trending", "finance-educational", "finance-educational", "finance-educational", "cultural-trending", "finance-educational"]
-
-    for i in range(8):
-        hours_ago = random.randint(1, 48)
-        discovered = datetime(2026, 2, 19, 12, 0, 0, tzinfo=timezone.utc)
-        conn.execute(
-            'INSERT INTO discovered_videos (platform, video_url, creator, description, hashtags, likes, comments_count, shares, classification, discovered_at, status, engaged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            (
-                platforms[i],
-                f"https://{platforms[i]}.com/video/{1000+i}",
-                creators[i],
-                descriptions[i],
-                json.dumps(hashtags_list[i]),
-                random.randint(500, 50000),
-                random.randint(50, 5000),
-                random.randint(10, 2000),
-                classifications[i],
-                discovered.isoformat(),
-                "engaged",
-                1,
-            ),
-        )
-
-    # Generated comments
-    comments_data = [
-        (1, "budgeting hack? tell me more, my wallet is listening 👀", "witty", 52),
-        (2, "this is genuinely great advice. the minimum payment trap is real", "helpful", 63),
-        (3, "me @ my credit score: it's been 84 years 😭 but fr it's worth checking", "witty", 68),
-        (4, "the 50/30/20 rule changed my whole approach to money tbh", "supportive", 55),
-        (5, "HYSA gang 🙌 seriously underrated move", "witty", 34),
-        (6, "saving this for later. tax season stress is real", "supportive", 45),
-        (7, "the consistency is the part nobody talks about 💯", "supportive", 47),
-        (8, "compound interest really is the 8th wonder of the world ngl", "helpful", 55),
-    ]
-    for vid_id, text, approach, char_count in comments_data:
-        conn.execute(
-            'INSERT INTO generated_comments (video_id, text, approach, char_count, selected) VALUES (?, ?, ?, ?, 1)',
-            (vid_id, text, approach, char_count),
-        )
-
-    # Engagements (posted comments)
-    for i in range(8):
-        hours_ago = random.randint(1, 36)
-        posted = datetime(2026, 2, 19, 10 + (i % 12), 30, 0, tzinfo=timezone.utc)
-        risk = random.randint(5, 28)
-        conn.execute(
-            'INSERT INTO engagements (platform, video_id, comment_id, comment_text, risk_score, approval_path, posted_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            (
-                platforms[i],
-                i + 1,
-                i + 1,
-                comments_data[i][1],
-                risk,
-                "auto" if risk < 20 else "human",
-                posted.isoformat(),
-                "posted",
-            ),
-        )
-
-    # Engagement metrics
-    for i in range(8):
-        conn.execute(
-            'INSERT INTO engagement_metrics (engagement_id, likes, replies, impressions) VALUES (?, ?, ?, ?)',
-            (i + 1, random.randint(10, 500), random.randint(0, 30), random.randint(100, 10000)),
-        )
-
-    # Review queue items (2 pending)
-    conn.execute(
-        'INSERT INTO review_queue (comment_id, video_id, proposed_text, risk_score, risk_reasoning, classification, queued_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        (None, 3, "honestly same. but checking it is the first step to fixing it 🙏", 42, "Moderate risk: indirect financial advice", "cultural-trending", now),
-    )
-    conn.execute(
-        'INSERT INTO review_queue (comment_id, video_id, proposed_text, risk_score, risk_reasoning, classification, queued_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        (None, 7, "this! most people quit before the compound effect kicks in", 35, "Low-moderate risk: motivational tone acceptable", "finance-educational", now),
     )
 
     conn.commit()

@@ -121,6 +121,29 @@ export default function AIPersonality() {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0B0F1A] overflow-hidden">
+      <style>{`
+        input[type="range"].temp-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #F59E0B;
+          cursor: pointer;
+          box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+          margin-top: 0;
+        }
+        input[type="range"].temp-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: white;
+          border: 3px solid #F59E0B;
+          cursor: pointer;
+          box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+        }
+      `}</style>
       <header className="h-20 px-8 border-b border-[#1F2937] bg-[#131828] flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -222,15 +245,93 @@ export default function AIPersonality() {
               </div>
             </div>
           ) : activePersona ? (
-            <div className="max-w-5xl mx-auto p-8">
-               <h2 className="text-2xl font-bold text-white mb-6">{activePersona.name}</h2>
-               <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748] mb-6">
-                 <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Core Identity</h3>
-                 <p className="text-gray-200 text-sm font-mono leading-relaxed">{activePersona.coreIdentity}</p>
+            <div className="max-w-5xl mx-auto p-8 space-y-6">
+               <div className="flex items-center gap-4 mb-2">
+                 <h2 className="text-2xl font-bold text-white">{activePersona.name}</h2>
+                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${activePersona.color} ${activePersona.bg}`}>{activePersona.type}</span>
+                 {activePersona.active && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30 uppercase tracking-wider">Active</span>}
                </div>
+
                <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748]">
-                 <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">Tone Modifiers</h3>
-                 <pre className="text-gray-200 text-sm font-mono whitespace-pre-wrap font-sans">{activePersona.toneModifiers}</pre>
+                 <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Core Identity</h3>
+                 <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line">{activePersona.coreIdentity}</p>
+               </div>
+
+               <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748]">
+                 <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Tone & Voice Calibration</h3>
+                 <pre className="text-gray-200 text-sm whitespace-pre-wrap font-sans leading-relaxed">{activePersona.toneModifiers}</pre>
+               </div>
+
+               {activePersona.voicePillars && (
+                 <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748]">
+                   <h3 className="text-sm font-semibold text-gray-400 uppercase mb-4">Voice Pillars</h3>
+                   <div className="grid grid-cols-2 gap-3">
+                     {activePersona.voicePillars.map((pillar: any, i: number) => (
+                       <div key={i} className="bg-[#0B0F1A] border border-[#2D3748] rounded-lg p-4">
+                         <div className="text-sm font-bold text-white mb-1">{pillar.name}</div>
+                         <p className="text-xs text-gray-400 italic">{pillar.cat || pillar.desc}</p>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+
+               {activePersona.contentTemplates && (
+                 <div className="bg-[#131828] p-6 rounded-xl border border-[#2D3748]">
+                   <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">Content Templates</h3>
+                   <div className="space-y-2">
+                     {activePersona.contentTemplates.map((t: string, i: number) => (
+                       <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                         <span className="text-[#F59E0B] mt-0.5">&#9679;</span>
+                         <span>{t}</span>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+
+               <div className="bg-[#131828] p-6 rounded-xl border border-red-500/20">
+                 <h3 className="text-sm font-semibold text-red-400 uppercase mb-3 flex items-center gap-2">
+                   <span className="material-symbols-outlined text-[16px]">shield</span>
+                   Guardrails & Rules
+                 </h3>
+                 <div className="space-y-2">
+                   {(activePersona.rules || []).map((rule: string, i: number) => (
+                     <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                       <span className="text-red-400 mt-0.5 text-xs">&#10005;</span>
+                       <span>{rule}</span>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+
+               <div className="bg-[#131828] p-5 rounded-xl border border-[#2D3748]">
+                 <div className="flex items-center justify-between mb-3">
+                   <span className="text-sm font-semibold text-gray-400 uppercase">Temperature</span>
+                   <span className="text-lg font-mono font-bold text-white">{(activePersona.temperature || 0.5).toFixed(2)}</span>
+                 </div>
+                 <div className="relative">
+                   <input
+                     type="range"
+                     min="0"
+                     max="1"
+                     step="0.01"
+                     value={activePersona.temperature || 0.5}
+                     onChange={(e) => {
+                       const newTemp = parseFloat(e.target.value);
+                       setPersonas(prev => prev.map(p => p.id === activePersona.id ? { ...p, temperature: newTemp } : p));
+                     }}
+                     className="w-full h-2 rounded-full appearance-none cursor-pointer temp-slider"
+                     style={{
+                       background: `linear-gradient(to right, #3B82F6 0%, #F59E0B ${(activePersona.temperature || 0.5) * 100}%, #1E2538 ${(activePersona.temperature || 0.5) * 100}%)`,
+                     }}
+                   />
+                 </div>
+                 <div className="flex justify-between mt-2 text-[10px] text-gray-500 uppercase tracking-wider">
+                   <span>Precise</span>
+                   <span>Balanced</span>
+                   <span>Creative</span>
+                 </div>
                </div>
             </div>
           ) : (
