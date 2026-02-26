@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     twitter_client_secret: str | None = None
     twitter_api_key: str | None = None
     twitter_api_secret: str | None = None
+    twitter_bearer_token: str | None = None
     twitter_access_token: str | None = None
     twitter_access_token_secret: str | None = None
     twitter_user_id: str | None = None
