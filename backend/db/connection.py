@@ -6,25 +6,18 @@ from backend.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-try:
-    from supabase import Client, create_client
-    _supabase_available = True
-except ImportError:
-    _supabase_available = False
-
 _client = None
 _admin = None
 _initialized = False
-_using_sqlite = False
+_using_sqlite = True
 
 
 def init_clients() -> None:
     global _client, _admin, _initialized, _using_sqlite
     _initialized = True
-    settings = get_settings()
-
-    # Use SQLite (works with both local dev and Railway)
-    # Railway's PostgreSQL can be accessed via DATABASE_URL if needed
+    
+    # Use SQLite for now (simple and reliable)
+    # PostgreSQL integration can be added later if needed
     from backend.db.sqlite_store import SQLiteClient, init_sqlite_db
     init_sqlite_db()
     _client = SQLiteClient()
