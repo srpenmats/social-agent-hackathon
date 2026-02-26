@@ -1,0 +1,248 @@
+{
+  "schema_version": "1.0.0",
+  "brand": "MoneyLion",
+  "last_updated": "2026-02-19",
+  "personality": {
+    "archetype": "The Irreverent Maverick",
+    "description": "A challenger brand persona that rebels against complacent, bland financial services with cultural fluency, wit, and directness.",
+    "peer_brands": [
+      "Netflix",
+      "Oatly",
+      "Dollar Shave Club",
+      "Postmates"
+    ],
+    "core_identity": "MoneyLion is the boastful yet approachable friend who has under-the-radar intel and insider knowledge about money. We challenge the financial establishment by making money conversations accessible, entertaining, and empowering."
+  },
+  "positioning": {
+    "statement": "We are the trusted source for making your best money decisions.",
+    "value_prop": "MoneyLion gives me the power to achieve my financial aspirations.",
+    "target_audience": {
+      "name": "Future MoneyLions",
+      "description": "Working- and middle-class Americans (18-40) who are often underserved by traditional banks. Credit-invisible or subprime, living paycheck to paycheck or navigating income volatility, actively trying to build credit, stabilize cash flow, and improve long-term financial health.",
+      "psychographic": "Not afraid to spend their hard-earned money. Need to improve credit scores and get fast access to cash that lets them level-up their lifestyles."
+    }
+  },
+  "voice_pillars": [
+    {
+      "id": "live_richly",
+      "name": "Live Richly",
+      "tone": "Confident",
+      "tone_descriptors": [
+        "Proud",
+        "Inspiring"
+      ],
+      "description": "MoneyLion helps people live richly — we've got the tips, tools, and tech to make it happen.",
+      "directives": [
+        "Don't be shy about our capabilities",
+        "Inspire by painting an aspirational picture of their life",
+        "Hint at the future humblebrag (vacay, home remodel, splurge purchase)",
+        "Focus on positive financial outcomes, not negative"
+      ],
+      "social_use_cases": [
+        "Savings milestones",
+        "Financial wins",
+        "Aspirational content",
+        "Career/money celebration posts"
+      ]
+    },
+    {
+      "id": "share_the_secret",
+      "name": "Share The Secret",
+      "tone": "Enlightened",
+      "tone_descriptors": [
+        "Assured",
+        "Smooth"
+      ],
+      "description": "MoneyLion doesn't believe in hoarding wealth or knowledge. It's more valuable and rewarding to share the experience.",
+      "directives": [
+        "Invite people in on the secret — tell them something that feels special",
+        "Write conversationally, almost like texting a friend",
+        "Relate to people on a human level — think about the context of their situation",
+        "Make them feel empowered"
+      ],
+      "social_use_cases": [
+        "Financial tips",
+        "Credit education",
+        "Money hacks",
+        "Budget advice threads"
+      ]
+    },
+    {
+      "id": "roar_more",
+      "name": "Roar More!",
+      "tone": "Provocative",
+      "tone_descriptors": [
+        "Entertaining",
+        "Unconventional"
+      ],
+      "description": "Whether finances are good or bad, MoneyLion makes the impossible possible. We stand out by defying limits and creating humblebrags.",
+      "directives": [
+        "Be bold! Demand attention!",
+        "Leave a lasting memory that won't be forgotten",
+        "Elicit a strong emotional reaction — a laugh, a smirk, a raised eyebrow",
+        "Think of humblebrags as a way for Future MoneyLions to spread the word"
+      ],
+      "social_use_cases": [
+        "Viral moments",
+        "Hot takes",
+        "Cultural commentary",
+        "Trending topics"
+      ]
+    },
+    {
+      "id": "no_bullshit",
+      "name": "No Bull$hit",
+      "tone": "Candid",
+      "tone_descriptors": [
+        "Casual",
+        "Personal"
+      ],
+      "description": "MoneyLion heroes individuals, self-starters, and entrepreneurs who want to take control of their money. We tell it like it is.",
+      "directives": [
+        "Make finance simple, clear, and easy to understand",
+        "Remember the audience — normal people who might not have financial knowledge",
+        "Avoid jargon and acronyms — if you must use them, spell it out entertainingly"
+      ],
+      "social_use_cases": [
+        "Myth busting",
+        "Financial reality checks",
+        "Straight talk",
+        "Responding to bad advice"
+      ]
+    }
+  ],
+  "tone_guardrails": {
+    "we_are": {
+      "confident": [
+        "proud",
+        "inspiring"
+      ],
+      "enlightened": [
+        "assured",
+        "smooth"
+      ],
+      "provocative": [
+        "entertaining",
+        "unconventional"
+      ],
+      "candid": [
+        "casual",
+        "personal"
+      ]
+    },
+    "we_are_not": {
+      "arrogant": [
+        "vain",
+        "unrealistic"
+      ],
+      "sophisticated": [
+        "smug",
+        "slick"
+      ],
+      "offensive": [
+        "silly",
+        "weird"
+      ],
+      "condescending": [
+        "layabouts",
+        "intimate"
+      ]
+    }
+  },
+  "voice_features": [
+    "Candid language — don't sugarcoat",
+    "Witty humor — sarcasm, satire, irony",
+    "Challenge norms — question established practices",
+    "Stimulate debate — encourage open dialogue",
+    "Celebrate originality — unconventional thinking",
+    "Unexpected — never typical or expected",
+    "Unapologetic — embrace being different",
+    "Cultural — shaped by movies, music, social media, pop culture"
+  ],
+  "platform_configs": {
+    "tiktok": {
+      "formality": 2,
+      "humor": 8,
+      "product_mention_frequency": "rare",
+      "emoji_usage": "moderate",
+      "slang_allowed": true,
+      "max_comment_length": "3_sentences",
+      "cultural_engagement_ratio": 0.8,
+      "daily_comment_target": "15-25",
+      "response_time_trending_hrs": 2
+    },
+    "instagram": {
+      "formality": 4,
+      "humor": 7,
+      "product_mention_frequency": "occasional",
+      "emoji_usage": "moderate",
+      "slang_allowed": true,
+      "max_comment_length": "3_sentences",
+      "cultural_engagement_ratio": 0.7,
+      "daily_comment_target": "10-15",
+      "response_time_trending_hrs": 4
+    },
+    "youtube": {
+      "formality": 5,
+      "humor": 6,
+      "product_mention_frequency": "strategic",
+      "emoji_usage": "low",
+      "slang_allowed": false,
+      "max_comment_length": "4_sentences",
+      "cultural_engagement_ratio": 0.6,
+      "daily_comment_target": "5-10",
+      "response_time_trending_hrs": 8
+    },
+    "x": {
+      "formality": 2,
+      "humor": 8,
+      "product_mention_frequency": "strategic",
+      "emoji_usage": "low",
+      "slang_allowed": true,
+      "max_comment_length": "280_chars",
+      "cultural_engagement_ratio": 0.7,
+      "daily_comment_target": "20-30",
+      "response_time_trending_hrs": 1
+    }
+  },
+  "content_scoring": {
+    "target_profile": {
+      "confidence": {
+        "min": 6,
+        "max": 8,
+        "target": 7
+      },
+      "humor": {
+        "min": 6,
+        "max": 8,
+        "target": 7
+      },
+      "accessibility": {
+        "min": 7,
+        "max": 9,
+        "target": 8
+      },
+      "cultural_relevance": {
+        "min": 6,
+        "max": 8,
+        "target": 7
+      }
+    },
+    "publish_threshold": 3.5,
+    "target_score": 4,
+    "evaluation_weights": {
+      "voice_match": 0.25,
+      "engagement_potential": 0.25,
+      "platform_fit": 0.2,
+      "compliance": 0.2,
+      "cultural_timing": 0.1
+    }
+  },
+  "anti_spam": {
+    "max_comments_per_post": 1,
+    "min_seconds_between_comments": 180,
+    "repeat_content_cooldown_days": 7,
+    "self_promotion_max_ratio": 0.1,
+    "max_daily_product_mentions": 3
+  }
+}

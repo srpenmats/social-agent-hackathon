@@ -1,0 +1,305 @@
+{
+  "schema_version": "1.0.0",
+  "last_updated": "2026-02-19",
+  "description": "Automated compliance guardrails for the MoneyLion Social Engagement Agent. These rules must be evaluated BEFORE any content is published.",
+  "banned_words": {
+    "absolute": [
+      "free",
+      "guaranteed",
+      "borrow",
+      "payday",
+      "payday loan",
+      "debt",
+      "credit lend",
+      "incur",
+      "finance",
+      "collection",
+      "installment",
+      "payback",
+      "dues",
+      "in seconds",
+      "error",
+      "problem",
+      "cheap",
+      "low",
+      "inexpensive",
+      "roar",
+      "pounce",
+      "lion",
+      "pride",
+      "lioness",
+      "mane",
+      "loan",
+      "LIAT",
+      "Loan in a Tap",
+      "EWA",
+      "earned wage access",
+      "FFA",
+      "Lite user",
+      "Core user",
+      "due date",
+      "maturity date",
+      "past due",
+      "default",
+      "late",
+      "overdue",
+      "in collections"
+    ],
+    "contextual": [
+      {
+        "word": "checking account",
+        "banned_context": "Describing RoarMoney",
+        "replacement": "banking account"
+      },
+      {
+        "word": "deposit",
+        "banned_context": "Standalone description of adding money to RoarMoney",
+        "replacement": "add funds, fund your account"
+      },
+      {
+        "word": "can",
+        "banned_context": "Absolute product claims (e.g. 'A personal loan can help')",
+        "replacement": "could, may, can potentially"
+      },
+      {
+        "word": "members",
+        "banned_context": "General user references",
+        "replacement": "customers (use 'members' only for CB+ or WOW membership holders)"
+      },
+      {
+        "word": "activate",
+        "banned_context": "Instacash references before user qualification",
+        "replacement": "explore, learn about"
+      },
+      {
+        "word": "claim",
+        "banned_context": "Instacash references before user qualification",
+        "replacement": "explore, learn about"
+      },
+      {
+        "word": "boost",
+        "banned_context": "IC limits without context about Safety Net + direct deposit",
+        "replacement": "Explain what actions increase the limit"
+      },
+      {
+        "word": "get paid early",
+        "banned_context": "Without qualifier",
+        "replacement": "get paid up to 2 days early"
+      },
+      {
+        "word": "Marketplace",
+        "banned_context": "Customer-facing product name",
+        "replacement": "Use specific product category name"
+      }
+    ]
+  },
+  "product_naming": {
+    "rules": [
+      "Always include 'MoneyLion' before product name on first mention",
+      "Never add apostrophe or change order (e.g. 'MoneyLion's RoarMoney' is WRONG)",
+      "Include trademark symbol on first mention only"
+    ],
+    "correct_names": {
+      "MoneyLion": {
+        "first_mention": "MoneyLion®",
+        "subsequent": "MoneyLion"
+      },
+      "RoarMoney": {
+        "first_mention": "MoneyLion RoarMoney℠",
+        "subsequent": "RoarMoney"
+      },
+      "Instacash": {
+        "first_mention": "MoneyLion Instacash®",
+        "subsequent": "Instacash"
+      },
+      "Credit Builder Plus": {
+        "first_mention": "MoneyLion Credit Builder Plus",
+        "subsequent": "Credit Builder Plus"
+      },
+      "WOW": {
+        "first_mention": "MoneyLion WOW",
+        "subsequent": "WOW"
+      },
+      "Shake N Bank": {
+        "first_mention": "Shake 'N' Bank",
+        "subsequent": "Shake 'N' Bank"
+      },
+      "Debit Card": {
+        "first_mention": "MoneyLion Debit Mastercard®",
+        "subsequent": "MoneyLion Debit Mastercard"
+      }
+    },
+    "misspellings_to_reject": [
+      "InstaCash",
+      "Insta cash",
+      "Insta Cash",
+      "Roar Money",
+      "Roarmoney",
+      "Roar money",
+      "MoneyLion's RoarMoney",
+      "RoarMoney by MoneyLion"
+    ]
+  },
+  "claim_qualifiers": {
+    "description": "Every product claim must include appropriate qualifiers. Reject content with unqualified claims.",
+    "rules": [
+      {
+        "claim_type": "cash_advance_limits",
+        "required_qualifier": "up to",
+        "correct_example": "Access up to $500",
+        "incorrect_example": "Get $500"
+      },
+      {
+        "claim_type": "early_pay",
+        "required_qualifier": "up to X days",
+        "correct_example": "Get paid up to 2 days early",
+        "incorrect_example": "Get paid 2 days early"
+      },
+      {
+        "claim_type": "cashback_amounts",
+        "required_qualifier": "up to + qualifying conditions",
+        "correct_example": "Earn up to $500 when you make a qualifying purchase of $10 or more",
+        "incorrect_example": "Earn $500 cashback"
+      },
+      {
+        "claim_type": "instacash_limit_increase",
+        "required_qualifier": "up to + Safety Net + direct deposit requirement",
+        "correct_example": "Increase your limits up to $1,000 with Safety Net — requires recurring direct deposit into RoarMoney",
+        "incorrect_example": "Get $1,000 in Instacash"
+      },
+      {
+        "claim_type": "personal_loan_outcomes",
+        "required_qualifier": "could / may / can potentially",
+        "correct_example": "A personal loan could help consolidate...",
+        "incorrect_example": "A personal loan will help..."
+      },
+      {
+        "claim_type": "speed_claims",
+        "required_qualifier": "with fee context",
+        "correct_example": "Access funds in minutes for a fee, or in 1-5 days with no fees",
+        "incorrect_example": "Get money in minutes"
+      },
+      {
+        "claim_type": "third_party_products",
+        "required_qualifier": "partner attribution",
+        "correct_example": "Explore personal loan offers from our trusted partners",
+        "incorrect_example": "Get a personal loan from MoneyLion"
+      }
+    ]
+  },
+  "social_specific_rules": [
+    {
+      "rule": "no_financial_advice",
+      "description": "Never provide specific financial advice. Comment on trends, share general tips, be entertaining — but never say 'you should invest in X' or 'you should take out a loan'.",
+      "severity": "critical"
+    },
+    {
+      "rule": "no_outcome_promises",
+      "description": "Don't guarantee savings, returns, approval, or specific dollar amounts in social comments.",
+      "severity": "critical"
+    },
+    {
+      "rule": "no_competitor_names",
+      "description": "Never disparage competitors by name. Be the anti-bank in tone without calling out specific institutions.",
+      "severity": "high"
+    },
+    {
+      "rule": "no_fomo_language",
+      "description": "Banned: 'Don't miss out', 'others are already using it', 'limited time' — unless factually required.",
+      "severity": "high"
+    },
+    {
+      "rule": "empathy_pivot",
+      "description": "If someone is in financial distress, pivot to empathy. NEVER pitch a product to someone expressing financial hardship.",
+      "severity": "critical"
+    },
+    {
+      "rule": "no_individual_finance_comments",
+      "description": "Don't reference someone's specific situation, income, debt, or credit score.",
+      "severity": "critical"
+    },
+    {
+      "rule": "no_unsubstantiated_claims",
+      "description": "Avoid claims like 'most people start here' or 'join the thousands' unless backed by approved data.",
+      "severity": "high"
+    },
+    {
+      "rule": "instacash_is_not_a_loan",
+      "description": "Instacash must NEVER be referred to as a loan, debt consolidation, credit product, or credit obligation in any context.",
+      "severity": "critical"
+    }
+  ],
+  "content_classification": {
+    "auto_publish": [
+      "Cultural engagement with no product mention",
+      "Finance-relevant comment with no product mention",
+      "Response to direct MoneyLion mention (if cultural)"
+    ],
+    "human_review_required": [
+      "Any content with a product mention",
+      "Response to direct MoneyLion mention (if product-related)",
+      "Content touching sensitive topics (layoffs, recession, debt crisis, financial hardship)",
+      "Content referencing specific dollar amounts or rates",
+      "Content that could be interpreted as financial advice"
+    ]
+  },
+  "sensitivity_topics": {
+    "requires_empathy_mode": [
+      "job loss",
+      "layoffs",
+      "bankruptcy",
+      "foreclosure",
+      "medical debt",
+      "financial abuse",
+      "homelessness",
+      "food insecurity",
+      "suicide",
+      "mental health crisis"
+    ],
+    "do_not_engage": [
+      "partisan politics",
+      "religious debates",
+      "discrimination",
+      "ongoing legal matters",
+      "other brand's crises",
+      "personal attacks on individuals"
+    ]
+  },
+  "disclaimer_triggers": {
+    "description": "If the agent's content triggers any of these, it must be flagged for human review with appropriate disclaimers.",
+    "triggers": [
+      {
+        "trigger": "Mentions Instacash by name",
+        "required_action": "Flag for review — may require Instacash Terms & Conditions link"
+      },
+      {
+        "trigger": "Mentions 'up to $1,000' Instacash limit",
+        "required_action": "Flag for review — requires Safety Net + RoarMoney DD disclaimer"
+      },
+      {
+        "trigger": "Mentions tips/tipping",
+        "required_action": "Flag for review — requires voluntary tips disclaimer"
+      },
+      {
+        "trigger": "Mentions RoarMoney features",
+        "required_action": "Flag for review — may require Pathward/FDIC issuer statement"
+      },
+      {
+        "trigger": "Mentions personal loan offers",
+        "required_action": "Flag for review — requires third-party disclaimer"
+      },
+      {
+        "trigger": "Mentions early paycheck",
+        "required_action": "Flag for review — requires 'up to 2 days' qualification"
+      },
+      {
+        "trigger": "Mentions Shake N Bank cashback",
+        "required_action": "Flag for review — requires $10 minimum + 5 shakes/month disclosure"
+      },
+      {
+        "trigger": "Mentions credit score improvement",
+        "required_action": "Flag for review — only valid for CB+ with specific proof points"
+      }
+    ]
+  }
+}
