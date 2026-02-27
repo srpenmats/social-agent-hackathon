@@ -140,15 +140,18 @@ class TwitterDiscoveryService:
         max_results: int = 20,
         min_engagement: int = 50
     ) -> List[Dict]:
-        """Discover tweets with minimum engagement filter."""
+        """
+        Discover tweets. 
+        
+        Changed logic: Don't hard-filter by min_engagement (would return 0 posts).
+        Instead, return ALL posts and let Smart Discovery scoring handle ranking.
+        Higher engagement posts will naturally score higher.
+        """
         tweets = await self.search_tweets(query, max_results)
         
-        filtered_tweets = [
-            tweet for tweet in tweets
-            if tweet.get("likes", 0) >= min_engagement
-        ]
-        
-        return filtered_tweets
+        # Don't filter out low-engagement posts - just return everything
+        # Smart Discovery will score them and rank by relevance + engagement
+        return tweets
     
     async def get_tweet_details(self, tweet_id: str) -> Dict:
         """Get full details for a single tweet."""
