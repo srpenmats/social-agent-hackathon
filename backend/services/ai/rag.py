@@ -12,6 +12,7 @@ from typing import Any
 
 from services.ai.brand_voice import BrandVoiceService
 from services.ai.embeddings import EmbeddingsService
+from services.ai.feedback_loop import FeedbackLoopService
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,17 @@ class RAGService:
             examples = _extract_examples(ref)
             if examples:
                 parts.append(f"# Examples\n{examples}")
+
+        # 5.5. Human feedback examples (learning loop)
+        try:
+            feedback_service = FeedbackLoopService()
+            feedback_context = feedback_service.get_feedback_context_for_prompt(
+                n_approved=5, n_denied=3
+            )
+            if feedback_context:
+                parts.append(f"# Learning from Human Feedback\n{feedback_context}")
+        except Exception as e:
+            logger.warning("Failed to load feedback context: %s", e)
 
         # 6. Core instructions
         parts.append(

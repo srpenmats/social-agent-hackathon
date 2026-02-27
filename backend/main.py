@@ -18,6 +18,7 @@ from routers import (
     discovery,
     discovery_enhanced,
     execution,
+    feedback,
     hubs,
     jen,
     neoclaw,
@@ -83,6 +84,7 @@ app.include_router(twitter_live.router)
 app.include_router(populate.router)
 app.include_router(populate_engagements.router)
 app.include_router(smart_discovery.router)
+app.include_router(feedback.router)
 
 
 @app.get("/api/v1/health")

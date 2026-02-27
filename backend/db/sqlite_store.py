@@ -429,6 +429,20 @@ def init_sqlite_db() -> None:
             system_stats TEXT DEFAULT '{}',
             created_at TEXT DEFAULT (datetime('now'))
         );
+        CREATE TABLE IF NOT EXISTS comment_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            comment_text TEXT NOT NULL,
+            original_post_text TEXT,
+            original_post_author TEXT,
+            platform TEXT DEFAULT 'x',
+            decision TEXT NOT NULL,
+            decision_reason TEXT,
+            risk_score REAL DEFAULT 0,
+            approach TEXT,
+            persona TEXT,
+            decided_at TEXT DEFAULT (datetime('now')),
+            decided_by TEXT DEFAULT 'reviewer'
+        );
     """)
 
     # Seed demo data if tables are empty
