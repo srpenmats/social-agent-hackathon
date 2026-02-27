@@ -23,6 +23,7 @@ from routers import (
     populate_engagements,
     quickfix,
     review,
+    scheduler,
     settings,
     twitter_live,
 )
@@ -55,6 +56,7 @@ app.include_router(execution.router)
 app.include_router(neoclaw.router)
 app.include_router(personas.router)
 app.include_router(agent_smart.router)
+app.include_router(scheduler.router)
 app.include_router(hubs.router)
 app.include_router(demo.router)
 app.include_router(discovery.router)

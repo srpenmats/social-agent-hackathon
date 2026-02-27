@@ -47,9 +47,13 @@ export default function XHub() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await fetch(`${API_BASE}/hubs/x/sync`, { method: 'POST' });
+      // Call intelligent agent to discover fresh Twitter data
+      const response = await fetch(`${API_BASE}/agent/auto-refresh`, { method: 'POST' });
+      if (!response.ok) {
+        console.warn('Auto-refresh failed, falling back to cache');
+      }
     } catch (e) {
-      console.warn('Sync request failed, reloading cached data:', e);
+      console.warn('Refresh request failed, reloading cached data:', e);
     }
     await fetchData();
     setRefreshing(false);
