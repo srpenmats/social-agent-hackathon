@@ -115,9 +115,9 @@ export default function ReviewPostsWidget() {
   };
 
   return (
-    <div className="bg-[#131828] border border-[#1F2937] rounded-xl flex flex-col overflow-hidden">
+    <div className="bg-[#131828] border border-[#1F2937] rounded-xl flex flex-col overflow-hidden h-[800px]">
       {/* Header */}
-      <div className="p-4 border-b border-[#1F2937] flex justify-between items-center bg-[#1E2538]/50">
+      <div className="p-4 border-b border-[#1F2937] flex justify-between items-center bg-[#1E2538]/50 flex-shrink-0">
         <h3 className="font-semibold text-white flex items-center gap-2">
           <span className="material-symbols-outlined text-[20px]">rate_review</span>
           Review Posts

@@ -306,14 +306,17 @@ export default function XHub() {
            </div>
         </div>
 
-        {/* Smart Discovery Widget - Full Width Below */}
-        <div className="w-full">
-          <SmartDiscoveryWidget />
-        </div>
+        {/* Smart Discovery & Review Posts - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Smart Discovery Widget */}
+          <div className="w-full">
+            <SmartDiscoveryWidget />
+          </div>
 
-        {/* Review Posts Widget */}
-        <div className="w-full mt-6">
-          <ReviewPostsWidget />
+          {/* Review Posts Widget */}
+          <div className="w-full">
+            <ReviewPostsWidget />
+          </div>
         </div>
       </div>
     </div>
