@@ -8,7 +8,7 @@ from typing import Optional, List
 from datetime import datetime, timezone
 import os
 
-from services.twitter_discovery import get_twitter_service
+from services.twitter_discovery import TwitterDiscoveryService
 from db.connection import get_supabase_admin
 
 router = APIRouter(prefix="/api/v1/discovery", tags=["discovery"])
@@ -51,7 +51,7 @@ async def search_twitter(request: TwitterSearchRequest):
         }
     """
     try:
-        twitter_service = get_twitter_service()
+        twitter_service = TwitterDiscoveryService()
         result = await twitter_service.discover_and_store(
             query=request.query,
             max_results=request.max_results,
@@ -90,7 +90,7 @@ async def get_discovered_posts(
     
     # Calculate engagement scores if requested
     if min_score is not None:
-        twitter_service = get_twitter_service()
+        twitter_service = TwitterDiscoveryService()
         scored_posts = []
         for post in posts:
             score = twitter_service.score_engagement_potential(post)
@@ -109,7 +109,7 @@ async def get_thread_context(tweet_id: str):
     Useful for understanding context before generating a reply.
     """
     try:
-        twitter_service = get_twitter_service()
+        twitter_service = TwitterDiscoveryService()
         thread = await twitter_service.get_thread_context(tweet_id)
         return {
             "tweet_id": tweet_id,
@@ -144,7 +144,7 @@ async def generate_comment(request: CommentGenerationRequest):
     """
     try:
         # Get thread context for better understanding
-        twitter_service = get_twitter_service()
+        twitter_service = TwitterDiscoveryService()
         thread = await twitter_service.get_thread_context(request.post_id)
         
         # Extract key topics
@@ -350,7 +350,7 @@ async def auto_discover(background_tasks: BackgroundTasks):
 async def _run_auto_discovery():
     """Background task for automated discovery."""
     try:
-        twitter_service = get_twitter_service()
+        twitter_service = TwitterDiscoveryService()
         
         # Define search queries
         queries = [
