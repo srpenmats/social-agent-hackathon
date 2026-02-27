@@ -75,13 +75,13 @@ class DiscoveryService:
         platform_id = str(row.data["id"])
 
         if platform == "tiktok":
-            from backend.services.social.tiktok import TikTokService
+            fromservices.social.tiktok import TikTokService
             return TikTokService(platform_id, self._supabase)
         elif platform == "instagram":
-            from backend.services.social.instagram import InstagramService
+            fromservices.social.instagram import InstagramService
             return InstagramService(platform_id, self._supabase)
         elif platform == "twitter":
-            from backend.services.social.twitter import TwitterService
+            fromservices.social.twitter import TwitterService
             return TwitterService(platform_id, self._supabase)
         return None
 

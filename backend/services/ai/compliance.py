@@ -10,8 +10,8 @@ import logging
 import re
 from typing import Any
 
-from backend.db.connection import get_supabase_admin
-from backend.services.ai.brand_voice import BrandVoiceService
+fromdb.connection import get_supabase_admin
+fromservices.ai.brand_voice import BrandVoiceService
 
 logger = logging.getLogger(__name__)
 

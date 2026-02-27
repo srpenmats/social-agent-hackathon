@@ -2,9 +2,9 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Query
 
-from backend.db.connection import get_supabase_admin
-from backend.middleware.auth import CurrentUser
-from backend.schemas.dashboard import (
+fromdb.connection import get_supabase_admin
+frommiddleware.auth import CurrentUser
+fromschemas.dashboard import (
     EngagementTimelinePoint,
     EngagementTimelineResponse,
     HashtagPerformance,

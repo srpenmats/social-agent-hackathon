@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.services.ai.voice_drift import (
+fromservices.ai.voice_drift import (
     DRIFT_ALERT_THRESHOLD,
     SEVERE_DRIFT_THRESHOLD,
     VoiceDriftMonitor,

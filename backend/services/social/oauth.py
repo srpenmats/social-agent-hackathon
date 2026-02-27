@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet, InvalidToken
 
-from backend.config import get_settings
+fromconfig import get_settings
 
 
 def _get_fernet() -> Fernet:

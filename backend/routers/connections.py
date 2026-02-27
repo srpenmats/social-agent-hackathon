@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 
-from backend.db.connection import get_supabase_admin
-from backend.middleware.auth import require_role
-from backend.schemas.connections import (
+fromdb.connection import get_supabase_admin
+frommiddleware.auth import require_role
+fromschemas.connections import (
     ConnectRequest,
     ConnectionTestResponse,
     OAuthCallbackRequest,
@@ -59,13 +59,13 @@ async def connect_platform(platform: str, body: ConnectRequest, user: dict = req
     # Delegate to platform-specific service for actual connection
     try:
         if platform == "tiktok":
-            from backend.services.social.tiktok import TikTokService
+            fromservices.social.tiktok import TikTokService
             await TikTokService().connect(body.credentials)
         elif platform == "instagram":
-            from backend.services.social.instagram import InstagramService
+            fromservices.social.instagram import InstagramService
             await InstagramService().connect(body.credentials)
         elif platform == "x":
-            from backend.services.social.twitter import TwitterService
+            fromservices.social.twitter import TwitterService
             await TwitterService().connect(body.credentials)
     except ImportError:
         pass  # Services not built yet
@@ -118,11 +118,11 @@ async def oauth_callback(
 
     try:
         if platform == "instagram":
-            from backend.services.social.instagram import InstagramService
+            fromservices.social.instagram import InstagramService
             result = await InstagramService().handle_oauth_callback(code, state)
             return result
         elif platform == "x":
-            from backend.services.social.twitter import TwitterService
+            fromservices.social.twitter import TwitterService
             result = await TwitterService().handle_oauth_callback(code, state)
             return result
     except ImportError:

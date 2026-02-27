@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query
 
-from backend.db.connection import get_supabase_admin
-from backend.middleware.auth import CurrentUser
-from backend.schemas.review import (
+fromdb.connection import get_supabase_admin
+frommiddleware.auth import CurrentUser
+fromschemas.review import (
     ReviewDecision,
     ReviewDecisionRequest,
     ReviewHistoryItem,
@@ -107,7 +107,7 @@ async def review_decide(
     # When approved, create a NeoClaw "post" task so the agent posts the comment
     if body.decision == ReviewDecision.approve:
         try:
-            from backend.services.neoclaw_queue import TaskQueue
+            fromservices.neoclaw_queue import TaskQueue
 
             review_row = (
                 db.table("review_queue")

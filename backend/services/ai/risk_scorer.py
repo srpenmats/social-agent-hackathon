@@ -13,9 +13,9 @@ from typing import Any
 
 import anthropic
 
-from backend.config import get_settings
-from backend.db.connection import get_supabase_admin
-from backend.services.ai.compliance import ComplianceChecker
+fromconfig import get_settings
+fromdb.connection import get_supabase_admin
+fromservices.ai.compliance import ComplianceChecker
 
 logger = logging.getLogger(__name__)
 

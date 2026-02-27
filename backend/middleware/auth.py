@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Request, status
 from jose import JWTError, jwt
 
-from backend.config import get_settings
+fromconfig import get_settings
 
 ALGORITHM = "HS256"
 

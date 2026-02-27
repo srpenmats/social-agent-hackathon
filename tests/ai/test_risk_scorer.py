@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.services.ai.risk_scorer import (
+fromservices.ai.risk_scorer import (
     DEFAULT_AUTO_APPROVE_MAX,
     DEFAULT_REVIEW_MAX,
     RiskScorer,

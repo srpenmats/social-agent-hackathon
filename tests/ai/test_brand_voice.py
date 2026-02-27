@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.services.ai.brand_voice import BrandVoiceService
+fromservices.ai.brand_voice import BrandVoiceService
 
 
 @pytest.fixture

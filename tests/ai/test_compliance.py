@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from backend.services.ai.compliance import ComplianceChecker
+fromservices.ai.compliance import ComplianceChecker
 
 
 @pytest.fixture

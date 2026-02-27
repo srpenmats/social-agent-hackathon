@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from backend.services.ai.comment_generator import CommentGenerator
+fromservices.ai.comment_generator import CommentGenerator
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
-from backend.schemas.comments import *  # noqa: F401, F403
-from backend.schemas.connections import *  # noqa: F401, F403
-from backend.schemas.dashboard import *  # noqa: F401, F403
-from backend.schemas.review import *  # noqa: F401, F403
-from backend.schemas.settings import *  # noqa: F401, F403
+fromschemas.comments import *  # noqa: F401, F403
+fromschemas.connections import *  # noqa: F401, F403
+fromschemas.dashboard import *  # noqa: F401, F403
+fromschemas.review import *  # noqa: F401, F403
+fromschemas.settings import *  # noqa: F401, F403
