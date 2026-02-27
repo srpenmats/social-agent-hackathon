@@ -9,6 +9,7 @@ from backend.routers import (
     comments,
     connections,
     dashboard,
+    demo,
     execution,
     hubs,
     neoclaw,
@@ -45,6 +46,7 @@ app.include_router(execution.router)
 app.include_router(neoclaw.router)
 app.include_router(personas.router)
 app.include_router(hubs.router)
+app.include_router(demo.router)
 
 
 @app.get("/api/v1/health")
