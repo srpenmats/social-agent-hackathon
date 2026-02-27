@@ -56,14 +56,12 @@ async def dashboard_overview(
     - Posts we're tracking (discovered content)
     """
     db = get_supabase_admin()
-    since = _timeframe_start(timeframe)
 
-    # Get OUR engagements (CashKitty's comments)
+    # Get OUR engagements (CashKitty's comments) - NO timeframe filter
     try:
         engagements = (
             db.table("engagements")
             .select("id, platform, posted_at, comment_text")
-            .gte("posted_at", since)
             .eq("status", "posted")
             .execute()
         )
