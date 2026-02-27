@@ -1,0 +1,19 @@
+{
+  "name": "twclaw",
+  "version": "1.0.0",
+  "description": "Twitter/X API CLI for OpenClaw",
+  "main": "index.js",
+  "bin": {
+    "twclaw": "./bin/twclaw.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["twitter", "x", "openclaw", "cli"],
+  "author": "aGENt",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "commander": "^11.0.0"
+  }
+}
