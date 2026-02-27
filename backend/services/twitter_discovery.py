@@ -100,6 +100,34 @@ class TwitterDiscoveryService:
             
             return results
     
+    async def discover_by_query(
+        self,
+        query: str,
+        max_results: int = 20,
+        min_engagement: int = 50
+    ) -> List[Dict]:
+        """
+        Discover tweets by query with minimum engagement filter.
+        
+        Args:
+            query: Search query
+            max_results: Maximum number of results
+            min_engagement: Minimum likes for quality filtering
+        
+        Returns:
+            List of tweet dictionaries filtered by engagement
+        """
+        # Search for tweets
+        tweets = await self.search_tweets(query, max_results)
+        
+        # Filter by minimum engagement
+        filtered_tweets = [
+            tweet for tweet in tweets
+            if tweet.get("likes", 0) >= min_engagement
+        ]
+        
+        return filtered_tweets
+    
     async def discover_and_store(
         self,
         query: str,
