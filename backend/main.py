@@ -29,6 +29,7 @@ from routers import (
     populate_engagements,
     quickfix,
     review,
+    review_posts,
     scheduler,
     settings,
     smart_discovery,
@@ -57,6 +58,7 @@ app.add_middleware(CORSMiddleware, **get_cors_config())
 app.include_router(dashboard.router)
 app.include_router(comments.router)
 app.include_router(review.router)
+app.include_router(review_posts.router)
 app.include_router(settings.router)
 app.include_router(connections.router)
 app.include_router(execution.router)

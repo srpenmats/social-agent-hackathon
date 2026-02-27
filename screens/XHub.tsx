@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { HubAPI, ApiError } from '../services/api';
 import SmartDiscoveryWidget from '../components/SmartDiscoveryWidget';
+import ReviewPostsWidget from '../components/ReviewPostsWidget';
 
 const API_BASE = 'http://localhost:8000/api/v1';
 
@@ -308,6 +309,11 @@ export default function XHub() {
         {/* Smart Discovery Widget - Full Width Below */}
         <div className="w-full">
           <SmartDiscoveryWidget />
+        </div>
+
+        {/* Review Posts Widget */}
+        <div className="w-full mt-6">
+          <ReviewPostsWidget />
         </div>
       </div>
     </div>

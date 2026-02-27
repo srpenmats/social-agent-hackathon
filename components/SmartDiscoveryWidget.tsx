@@ -89,9 +89,22 @@ export default function SmartDiscoveryWidget() {
   };
 
   const handleAddToQueue = async (post: PostAnalysis) => {
-    // TODO: Implement add to review queue
-    console.log('Add to queue:', post.post_id);
-    alert(`Adding post by @${post.author} to review queue (not implemented yet)`);
+    try {
+      const response = await fetch(`${API_BASE}/jen/review-posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      });
+      
+      if (response.ok) {
+        alert(`✅ Added post by @${post.author} to Review Queue!`);
+      } else {
+        throw new Error('Failed to add to queue');
+      }
+    } catch (error) {
+      console.error('Failed to add to queue:', error);
+      alert(`❌ Failed to add to review queue. Please try again.`);
+    }
   };
 
   return (
