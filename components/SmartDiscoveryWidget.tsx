@@ -28,7 +28,7 @@ interface SmartDiscoveryResponse {
   top_post: PostAnalysis | null;
 }
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.REACT_APP_API_BASE || 'https://social-agent-hackathon-production.up.railway.app/api/v1';
 
 export default function SmartDiscoveryWidget() {
   const [query, setQuery] = useState('');

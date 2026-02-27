@@ -23,7 +23,7 @@ interface ReviewPost {
   created_at: string;
 }
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.REACT_APP_API_BASE || 'https://social-agent-hackathon-production.up.railway.app/api/v1';
 
 export default function ReviewPostsWidget() {
   const [posts, setPosts] = useState<ReviewPost[]>([]);
