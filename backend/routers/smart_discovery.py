@@ -95,28 +95,53 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
     Smart Discovery: User provides context, GenClaw intelligently discovers + analyzes posts.
     
     Flow:
-    1. GenClaw determines optimal min_engagement based on context
-    2. Search Twitter API with user's query
-    3. For each post, run Jen-style analysis:
-       - Relevance to Agent Trust Hub
-       - Engagement potential
-       - Recommended persona
-       - Risk level
-       - Angle we'd take
-       - Overall recommendation score (0-10)
-    4. Return ranked recommendations
+    1. Extract keywords from conversational query
+    2. GenClaw determines optimal min_engagement based on context
+    3. Search Twitter API with extracted keywords
+    4. For each post, run Jen-style analysis
+    5. Return ranked recommendations
     """
     
+    # Extract keywords from conversational query
+    query = request.query.strip()
+    
+    # If query is conversational (like "Give me 10 top posts for..."), extract keywords
+    conversational_patterns = [
+        "give me",
+        "show me",
+        "find me",
+        "search for",
+        "looking for",
+        "i want",
+        "can you find",
+        "get me",
+        "top posts",
+        "best posts",
+    ]
+    
+    query_lower = query.lower()
+    for pattern in conversational_patterns:
+        if pattern in query_lower:
+            # Extract keywords after the pattern
+            query = query_lower.replace(pattern, "").strip()
+            # Remove common filler words
+            filler_words = ["the", "a", "an", "for", "about", "on", "posts", "post"]
+            query_words = [w for w in query.split() if w not in filler_words and not w.isdigit()]
+            query = " ".join(query_words)
+            break
+    
+    logger.info(f"Original query: {request.query} | Extracted keywords: {query}")
+    
     # INTELLIGENT LAYER: Determine min_engagement based on context
-    min_engagement = determine_min_engagement_from_context(request.query)
-    logger.info(f"GenClaw determined min_engagement={min_engagement} for query: {request.query}")
+    min_engagement = determine_min_engagement_from_context(query)
+    logger.info(f"GenClaw determined min_engagement={min_engagement} for keywords: {query}")
     
     # Step 1: Discover posts via Twitter API
     twitter_service = TwitterDiscoveryService()
     
     try:
         discovered_posts = await twitter_service.discover_by_query(
-            query=request.query,
+            query=query,  # Use extracted keywords
             max_results=request.max_results,
             min_engagement=min_engagement
         )
@@ -126,7 +151,7 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
     
     if not discovered_posts:
         return SmartDiscoveryResponse(
-            query=request.query,
+            query=request.query,  # Return original query for display
             found_posts=0,
             analyzed_posts=0,
             recommendations=[],
