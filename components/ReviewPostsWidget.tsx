@@ -36,6 +36,19 @@ export default function ReviewPostsWidget() {
     loadReviewPosts();
   }, [filter]);
 
+  // Listen for updates from Smart Discovery
+  useEffect(() => {
+    const handleUpdate = () => {
+      loadReviewPosts();
+    };
+    
+    window.addEventListener('review-queue-updated', handleUpdate);
+    
+    return () => {
+      window.removeEventListener('review-queue-updated', handleUpdate);
+    };
+  }, [filter]);
+
   const loadReviewPosts = async () => {
     setLoading(true);
     try {

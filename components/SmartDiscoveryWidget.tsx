@@ -40,6 +40,7 @@ export default function SmartDiscoveryWidget() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SmartDiscoveryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [addingToQueue, setAddingToQueue] = useState<string | null>(null);
 
   const handleDiscover = async () => {
     if (!query.trim()) {
@@ -94,6 +95,7 @@ export default function SmartDiscoveryWidget() {
   };
 
   const handleAddToQueue = async (post: PostAnalysis) => {
+    setAddingToQueue(post.post_id);
     try {
       const response = await fetch(`${API_BASE}/jen/review-posts`, {
         method: 'POST',
@@ -102,13 +104,20 @@ export default function SmartDiscoveryWidget() {
       });
       
       if (response.ok) {
-        alert(`✅ Added post by @${post.author} to Review Queue!`);
+        // Trigger custom event to refresh Review Posts widget
+        window.dispatchEvent(new CustomEvent('review-queue-updated'));
+        
+        // Show success message (brief)
+        setTimeout(() => {
+          setAddingToQueue(null);
+        }, 1000);
       } else {
         throw new Error('Failed to add to queue');
       }
     } catch (error) {
       console.error('Failed to add to queue:', error);
       alert(`❌ Failed to add to review queue. Please try again.`);
+      setAddingToQueue(null);
     }
   };
 
@@ -296,10 +305,24 @@ export default function SmartDiscoveryWidget() {
                       </div>
                       <button
                         onClick={() => handleAddToQueue(post)}
-                        className="w-full px-3 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 rounded text-sm font-medium hover:bg-[#1DA1F2]/20 transition-colors flex items-center justify-center gap-1"
+                        disabled={addingToQueue === post.post_id}
+                        className={`w-full px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center gap-1 ${
+                          addingToQueue === post.post_id
+                            ? 'bg-green-500/20 text-green-500 border border-green-500/30'
+                            : 'bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 hover:bg-[#1DA1F2]/20'
+                        }`}
                       >
-                        <span className="material-symbols-outlined text-[14px]">add_circle</span>
-                        Add to Review Queue
+                        {addingToQueue === post.post_id ? (
+                          <>
+                            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                            Added to Queue!
+                          </>
+                        ) : (
+                          <>
+                            <span className="material-symbols-outlined text-[14px]">add_circle</span>
+                            Add to Review Queue
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
