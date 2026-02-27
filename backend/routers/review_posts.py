@@ -241,7 +241,7 @@ async def get_response_queue(limit: int = 50):
     try:
         result = db.table("review_posts")\
             .select("*")\
-            .eq("posted", True)\
+            .eq("posted", 1)\
             .order("responded_at", desc=True)\
             .limit(limit)\
             .execute()
