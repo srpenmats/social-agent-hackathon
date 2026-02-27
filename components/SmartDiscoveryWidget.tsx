@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HubAPI, JenAPI } from '../services/api';
 
 interface PostAnalysis {
   post_id: string;
@@ -33,8 +34,6 @@ interface SmartDiscoveryResponse {
   context_summary?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.REACT_APP_API_BASE || 'https://social-agent-hackathon-production.up.railway.app/api/v1';
-
 export default function SmartDiscoveryWidget() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,20 +51,7 @@ export default function SmartDiscoveryWidget() {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE}/hubs/x/smart-discovery`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query.trim(),
-          max_results: 10,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      const data: SmartDiscoveryResponse = await response.json();
+      const data: SmartDiscoveryResponse = await HubAPI.smartDiscovery(query.trim(), 10);
       setResults(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to discover posts');
@@ -97,26 +83,14 @@ export default function SmartDiscoveryWidget() {
   const handleAddToQueue = async (post: PostAnalysis) => {
     setAddingToQueue(post.post_id);
     try {
-      const response = await fetch(`${API_BASE}/jen/review-posts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(post)
-      });
-      
-      if (response.ok) {
-        // Trigger custom event to refresh Review Posts widget
-        window.dispatchEvent(new CustomEvent('review-queue-updated'));
-        
-        // Show success message (brief)
-        setTimeout(() => {
-          setAddingToQueue(null);
-        }, 1000);
-      } else {
-        throw new Error('Failed to add to queue');
-      }
+      await JenAPI.addReviewPost(post);
+      window.dispatchEvent(new CustomEvent('review-queue-updated'));
+      setTimeout(() => {
+        setAddingToQueue(null);
+      }, 1000);
     } catch (error) {
       console.error('Failed to add to queue:', error);
-      alert(`❌ Failed to add to review queue. Please try again.`);
+      setError('Failed to add to review queue. Please try again.');
       setAddingToQueue(null);
     }
   };

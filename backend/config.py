@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     neoclaw_api_key: str | None = None
 
     # CORS
-    cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://social-agent-hackathon.vercel.app"
 
 
 @lru_cache

@@ -1,29 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { HubAPI, ApiError } from '../services/api';
+import { HubAPI, JenAPI, AgentAPI, ReviewAPI, ApiError } from '../services/api';
 import SmartDiscoveryWidget from '../components/SmartDiscoveryWidget';
 import ReviewPostsWidget from '../components/ReviewPostsWidget';
-
-const API_BASE = 'http://localhost:8000/api/v1';
-
-const decideDraft = async (reviewId: number, decision: 'approve' | 'reject', editedText?: string) => {
-  const token = localStorage.getItem('auth_token');
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  const body: Record<string, string> = { decision };
-  if (editedText !== undefined) body.edited_text = editedText;
-
-  const resp = await fetch(`${API_BASE}/review/${reviewId}/decide`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-  });
-  if (!resp.ok) {
-    const detail = await resp.text().catch(() => 'Unknown error');
-    throw new Error(`Failed to decide: ${detail}`);
-  }
-  return resp.json();
-};
 
 export default function XHub() {
   const [data, setData] = useState<any>(null);
@@ -35,14 +13,8 @@ export default function XHub() {
   const fetchData = useCallback(async () => {
     try {
       const result = await HubAPI.getStats('x');
-      
-      // Also fetch response queue
-      const responseQueueRes = await fetch(`${API_BASE}/jen/response-queue?limit=10`);
-      const responseQueue = await responseQueueRes.json();
-      
-      // Merge response queue into data.drafts for display
+      const responseQueue = await JenAPI.getResponseQueue(10);
       result.drafts = responseQueue.posts || [];
-      
       setData(result);
       setError(null);
     } catch (err) {
@@ -57,11 +29,7 @@ export default function XHub() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Call intelligent agent to discover fresh Twitter data
-      const response = await fetch(`${API_BASE}/agent/auto-refresh`, { method: 'POST' });
-      if (!response.ok) {
-        console.warn('Auto-refresh failed, falling back to cache');
-      }
+      await AgentAPI.autoRefresh();
     } catch (e) {
       console.warn('Refresh request failed, reloading cached data:', e);
     }
@@ -71,11 +39,8 @@ export default function XHub() {
 
   const handleApprove = async (item: any) => {
     try {
-      await decideDraft(item.id, 'approve');
-      setData((prev: any) => ({
-        ...prev,
-        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
-      }));
+      await ReviewAPI.decide(String(item.id), 'approve');
+      setData((prev: any) => ({ ...prev, drafts: prev.drafts.filter((d: any) => d.id !== item.id) }));
     } catch (e) {
       console.error('Failed to approve draft:', e);
     }
@@ -83,11 +48,8 @@ export default function XHub() {
 
   const handleReject = async (item: any) => {
     try {
-      await decideDraft(item.id, 'reject');
-      setData((prev: any) => ({
-        ...prev,
-        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
-      }));
+      await ReviewAPI.decide(String(item.id), 'reject');
+      setData((prev: any) => ({ ...prev, drafts: prev.drafts.filter((d: any) => d.id !== item.id) }));
     } catch (e) {
       console.error('Failed to reject draft:', e);
     }
@@ -100,11 +62,8 @@ export default function XHub() {
 
   const handleSaveEdit = async (item: any) => {
     try {
-      await decideDraft(item.id, 'approve', editText);
-      setData((prev: any) => ({
-        ...prev,
-        drafts: prev.drafts.filter((d: any) => d.id !== item.id),
-      }));
+      await ReviewAPI.decide(String(item.id), 'approve', editText);
+      setData((prev: any) => ({ ...prev, drafts: prev.drafts.filter((d: any) => d.id !== item.id) }));
       setEditingId(null);
       setEditText('');
     } catch (e) {

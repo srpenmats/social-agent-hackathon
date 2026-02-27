@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { JenAPI } from '../services/api';
 
 interface ReviewPost {
   id: string;
@@ -22,8 +23,6 @@ interface ReviewPost {
   draft_comment?: string;
   created_at: string;
 }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.REACT_APP_API_BASE || 'https://social-agent-hackathon-production.up.railway.app/api/v1';
 
 export default function ReviewPostsWidget() {
   const [posts, setPosts] = useState<ReviewPost[]>([]);
@@ -52,8 +51,7 @@ export default function ReviewPostsWidget() {
   const loadReviewPosts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/jen/review-posts?status=${filter}`);
-      const data = await response.json();
+      const data = await JenAPI.getReviewPosts(filter);
       setPosts(data.posts || []);
     } catch (error) {
       console.error('Failed to load review posts:', error);
@@ -69,11 +67,7 @@ export default function ReviewPostsWidget() {
 
   const handleSaveDraft = async (postId: string) => {
     try {
-      await fetch(`${API_BASE}/jen/review-posts/${postId}/draft`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment: editComment })
-      });
+      await JenAPI.saveDraft(postId, editComment);
       setEditingId(null);
       loadReviewPosts();
     } catch (error) {
@@ -83,13 +77,8 @@ export default function ReviewPostsWidget() {
 
   const handleApprove = async (postId: string, comment: string) => {
     if (!confirm('Approve this comment for posting?')) return;
-    
     try {
-      await fetch(`${API_BASE}/jen/review-posts/${postId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment })
-      });
+      await JenAPI.approvePost(postId, comment);
       loadReviewPosts();
     } catch (error) {
       console.error('Failed to approve:', error);
@@ -98,11 +87,8 @@ export default function ReviewPostsWidget() {
 
   const handleRemove = async (postId: string) => {
     if (!confirm('Remove this post from review queue?')) return;
-    
     try {
-      await fetch(`${API_BASE}/jen/review-posts/${postId}`, {
-        method: 'DELETE'
-      });
+      await JenAPI.deletePost(postId);
       loadReviewPosts();
     } catch (error) {
       console.error('Failed to remove:', error);

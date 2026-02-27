@@ -1,6 +1,6 @@
 // API Client for SocialAgent Pro Backend
 
-const BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:8000/api/v1';
+export const BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:8000/api/v1';
 
 export class ApiError extends Error {
   status: number;
@@ -14,7 +14,7 @@ export class ApiError extends Error {
   }
 }
 
-async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('auth_token');
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -111,6 +111,52 @@ export const PersonaAPI = {
 export const HubAPI = {
   getStats: (platform: string) =>
     apiFetch<any>(`/hubs/${platform}/stats`),
+
+  smartDiscovery: (query: string, maxResults = 10) =>
+    apiFetch<any>(`/hubs/x/smart-discovery`, {
+      method: 'POST',
+      body: JSON.stringify({ query, max_results: maxResults }),
+    }),
+};
+
+// --- Jen (Review Posts) ---
+
+export const JenAPI = {
+  getResponseQueue: (limit = 10) =>
+    apiFetch<{ posts: any[] }>(`/jen/response-queue?limit=${limit}`),
+
+  getReviewPosts: (status: string = 'pending') =>
+    apiFetch<{ posts: any[] }>(`/jen/review-posts?status=${status}`),
+
+  addReviewPost: (post: any) =>
+    apiFetch<any>('/jen/review-posts', {
+      method: 'POST',
+      body: JSON.stringify(post),
+    }),
+
+  saveDraft: (postId: string, comment: string) =>
+    apiFetch<any>(`/jen/review-posts/${postId}/draft`, {
+      method: 'PUT',
+      body: JSON.stringify({ comment }),
+    }),
+
+  approvePost: (postId: string, comment: string) =>
+    apiFetch<any>(`/jen/review-posts/${postId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
+    }),
+
+  deletePost: (postId: string) =>
+    apiFetch<any>(`/jen/review-posts/${postId}`, {
+      method: 'DELETE',
+    }),
+};
+
+// --- Agent ---
+
+export const AgentAPI = {
+  autoRefresh: () =>
+    apiFetch<any>('/agent/auto-refresh', { method: 'POST' }),
 };
 
 // --- Comments / Library ---

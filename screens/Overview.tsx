@@ -34,11 +34,17 @@ export default function Overview({ onNavigate }: OverviewProps) {
         setSystemStatus(status);
         setKillSwitch(status.kill_switch_enabled ?? false);
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.warn('System status unavailable:', err);
+        setSystemStatus({ uptime: 'N/A', discovery_latency_ms: null, queue_depth: null, api_health: 'N/A' });
+      });
 
     ConnectionsAPI.getConnections()
       .then(setConnections)
-      .catch(() => {});
+      .catch((err) => {
+        console.warn('Connections unavailable:', err);
+        setConnections([]);
+      });
   }, []);
 
   const handleKillSwitch = async () => {
