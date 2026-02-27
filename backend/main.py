@@ -21,6 +21,7 @@ from routers import (
     quickfix,
     review,
     settings,
+    twitter_live,
 )
 
 
@@ -57,6 +58,7 @@ app.include_router(discovery_enhanced.router)
 app.include_router(db_init.router)
 app.include_router(db_seed.router)
 app.include_router(quickfix.router)
+app.include_router(twitter_live.router)
 
 
 @app.get("/api/v1/health")
