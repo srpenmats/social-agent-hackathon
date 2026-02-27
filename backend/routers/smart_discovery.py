@@ -16,31 +16,13 @@ from fastapi import APIRouter, HTTPException
 from db.connection import get_supabase_admin
 from services.twitter_discovery import TwitterDiscoveryService
 from services.intelligent_query import process_user_query_with_neoclaw, generate_response_summary
+from services.context_engine_loader import AGENT_TRUST_HUB_CONTEXT
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["hubs"])
 
 
-# Load Agent Trust Hub context
-AGENT_TRUST_HUB_CONTEXT = """
-Agent Trust Hub by Gen Digital provides security infrastructure for AI agents:
-
-- Skills Scanner: Free pre-install verification of agent skills (like npm audit for AI)
-- Marketplace: Curated skills with 4-tier security ratings (verified, audited, community, unverified)
-- Sage: Runtime monitoring with 200+ security rules (open source)
-- Vercel Partnership: Integrated into skills.sh for 6M developers
-
-Key Statistics:
-- 18K+ agent instances exposed publicly
-- 12-15% found to be malicious
-- 500M Gen users benefit from security infrastructure
-
-Focus Areas:
-- Supply chain attacks on AI agents
-- Malicious skills/plugins
-- OWASP LLM top 10 risks
-- Agent trust and verification
-"""
+# Context is now loaded from Jen Context Engine files
 
 
 def determine_min_engagement_from_context(query: str) -> int:
