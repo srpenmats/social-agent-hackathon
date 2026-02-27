@@ -133,6 +133,8 @@ async def discover_smart(request: SmartDiscoveryRequest):
                 "description": tweet["text"][:500],
                 "hashtags": json.dumps(hashtags),
                 "likes": tweet["likes"],
+                "comments": tweet["replies"],  # Store Twitter replies/comments
+                "shares": tweet["retweets"],    # Store Twitter retweets/shares
                 "status": "discovered",
                 "engaged": 0
             }

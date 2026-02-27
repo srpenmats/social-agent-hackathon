@@ -185,6 +185,9 @@ def init_postgres_db(database_url: str):
             description TEXT,
             hashtags JSONB,
             likes INTEGER DEFAULT 0,
+            comments INTEGER DEFAULT 0,
+            shares INTEGER DEFAULT 0,
+            views INTEGER DEFAULT 0,
             status TEXT DEFAULT 'discovered',
             engaged INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
