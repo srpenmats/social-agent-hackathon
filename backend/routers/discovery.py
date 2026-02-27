@@ -77,7 +77,12 @@ async def discover_tweets_background(query: str, max_results: int, job_id: str):
                     "job_id": job_id
                 }
                 
-                db.table("discovered_posts").upsert(record, on_conflict="post_id").execute()
+                # Check if post already exists
+                existing = db.table("discovered_posts").select("id").eq("post_id", record["post_id"]).execute()
+                if existing.data:
+                    db.table("discovered_posts").update(record).eq("post_id", record["post_id"]).execute()
+                else:
+                    db.table("discovered_posts").insert(record).execute()
                 discovered_count += 1
             
             # Update job status

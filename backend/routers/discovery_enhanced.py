@@ -298,7 +298,12 @@ async def sync_to_hub():
                 "discovered_at": post.get("discovered_at"),
             }
             
-            db.table("discovered_videos").upsert(video_record, on_conflict="video_url").execute()
+            # Check if video already exists
+            existing = db.table("discovered_videos").select("id").eq("video_url", video_record["video_url"]).execute()
+            if existing.data:
+                db.table("discovered_videos").update(video_record).eq("video_url", video_record["video_url"]).execute()
+            else:
+                db.table("discovered_videos").insert(video_record).execute()
             
             # Mark as synced
             db.table("discovered_posts").update({
