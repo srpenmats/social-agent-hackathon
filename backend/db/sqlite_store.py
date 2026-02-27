@@ -443,6 +443,38 @@ def init_sqlite_db() -> None:
             decided_at TEXT DEFAULT (datetime('now')),
             decided_by TEXT DEFAULT 'reviewer'
         );
+        CREATE TABLE IF NOT EXISTS review_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id TEXT UNIQUE NOT NULL,
+            author TEXT,
+            text TEXT,
+            url TEXT,
+            likes INTEGER DEFAULT 0,
+            retweets INTEGER DEFAULT 0,
+            replies INTEGER DEFAULT 0,
+            quotes INTEGER DEFAULT 0,
+            bookmarks INTEGER DEFAULT 0,
+            impressions INTEGER DEFAULT 0,
+            relevance_score REAL DEFAULT 0,
+            engagement_potential REAL DEFAULT 0,
+            persona_recommendation TEXT,
+            risk_level TEXT DEFAULT 'green',
+            angle_summary TEXT,
+            recommendation_score REAL DEFAULT 0,
+            reasoning TEXT,
+            status TEXT DEFAULT 'pending',
+            draft_comment TEXT,
+            final_comment TEXT,
+            posted INTEGER DEFAULT 0,
+            posted_at TEXT,
+            posted_url TEXT,
+            responded_at TEXT,
+            response_text TEXT,
+            response_url TEXT,
+            error TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT
+        );
     """)
 
     # Seed demo data if tables are empty

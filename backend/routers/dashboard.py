@@ -62,27 +62,43 @@ async def dashboard_overview(
     db = get_supabase_admin()
     since = _timeframe_start(timeframe)
 
-    # Get discovered posts (content we're tracking)
+    # Get OUR posted comments (engagements)
     try:
-        discovered = (
-            db.table("discovered_videos")
+        posted = (
+            db.table("engagements")
             .select("*")
             .execute()
         )
-        tracked_posts = discovered.data or []
+        our_comments = posted.data or []
     except Exception as e:
-        print(f"Error fetching discovered posts: {e}")
-        tracked_posts = []
+        print(f"Error fetching engagements: {e}")
+        our_comments = []
+
+    # Get metrics for our comments
+    total_likes = 0
+    total_replies = 0
+    for comment in our_comments:
+        try:
+            metrics = (
+                db.table("engagement_metrics")
+                .select("likes, replies")
+                .eq("engagement_id", comment["id"])
+                .order("checked_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+            if metrics.data:
+                total_likes += metrics.data[0].get("likes", 0)
+                total_replies += metrics.data[0].get("replies", 0)
+        except Exception:
+            pass
+
+    comments_posted = len(our_comments)
     
-    # Calculate engagement metrics from discovered posts
-    total_likes = sum(post.get("likes", 0) for post in tracked_posts)
-    total_comments = sum(post.get("comments", 0) for post in tracked_posts)
-    total_shares = sum(post.get("shares", 0) for post in tracked_posts)
-    
-    # Count active platforms (has data in discovered_videos)
+    # Count active platforms
     active_platforms_set = set()
-    for post in tracked_posts:
-        platform = post.get("platform")
+    for comment in our_comments:
+        platform = comment.get("platform")
         if platform:
             active_platforms_set.add(platform)
     active = len(active_platforms_set)
@@ -94,14 +110,14 @@ async def dashboard_overview(
     except Exception:
         pending_reviews = 0
 
-    # Stats cards - Show discovered content engagement
-    total_comments_tracked = len(tracked_posts)
+    # Stats cards - Show our comment engagement
+    total_comments_tracked = len(our_comments)
     
     stats = [
         {
             "title": "Comments Posted",
-            "value": "10",  # Hardcoded for demo (would come from engagements table)
-            "trend": f"By CashKitty",
+            "value": str(comments_posted),
+            "trend": "By CashKitty",
             "trendUp": True,
             "icon": "chat",
             "color": "bg-[#1DA1F2]",
@@ -118,7 +134,7 @@ async def dashboard_overview(
         },
         {
             "title": "Replies Received",
-            "value": f"{total_comments:,}",
+            "value": f"{total_replies:,}",
             "trend": f"To our comments",
             "trendUp": True,
             "icon": "reply",
@@ -139,77 +155,76 @@ async def dashboard_overview(
     # Platform health cards
     platform_health = []
     
-    # Group tracked posts by platform
-    tracked_by_platform = {}
-    for post in tracked_posts:
-        platform = post.get("platform", "unknown")
-        tracked_by_platform[platform] = tracked_by_platform.get(platform, 0) + 1
-    
+    # Group our comments by platform
+    comments_by_platform = {}
+    for comment in our_comments:
+        platform = comment.get("platform", "unknown")
+        comments_by_platform[platform] = comments_by_platform.get(platform, 0) + 1
+
     for key in ("tiktok", "instagram", "x"):
         meta = _PLATFORM_META[key]
-        
+
         # Platform is connected if we have data for it
         connected = key in active_platforms_set
-        tracked_count = tracked_by_platform.get(key, 0)
-        
-        # Calculate sentiment (average of positive engagement)
+        platform_comment_count = comments_by_platform.get(key, 0)
+
+        # Calculate sentiment from our comments on this platform
         sentiment = "N/A"
-        if connected and tracked_count > 0:
-            # Simple sentiment: percentage of posts with high engagement
-            platform_posts = [p for p in tracked_posts if p.get("platform") == key]
-            if platform_posts:
-                avg_engagement = sum(p.get("likes", 0) + p.get("comments", 0) for p in platform_posts) / len(platform_posts)
-                sentiment = f"{min(int(avg_engagement / 10), 100)}%"
-        
+        if connected and platform_comment_count > 0:
+            platform_comments = [c for c in our_comments if c.get("platform") == key]
+            if platform_comments:
+                sentiment = f"{min(int(platform_comment_count * 10), 100)}%"
+
         platform_health.append(
             {
                 **meta,
                 "statusColor": "bg-emerald-500" if connected else "bg-gray-500",
                 "stat1Lbl": "Comments",
-                "stat1Val": "10" if key == "x" else "0",  # Demo data
+                "stat1Val": str(len([c for c in our_comments if c.get("platform") == key])),
                 "stat2Lbl": "Sentiment",
                 "stat2Val": sentiment,
             }
         )
 
-    # Chart data - engagement over time (from discovered_videos)
-    # Group posts by 3-hour buckets
+    # Chart data - our engagement activity over time
     chart = []
-    likes_buckets = [0] * 8
-    comments_buckets = [0] * 8
-    shares_buckets = [0] * 8
-    
-    for post in tracked_posts:
-        created_at = post.get("created_at")
-        if created_at:
-            try:
-                dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                hours_ago = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
-                bucket_idx = min(int(hours_ago / 3), 7)
-                
-                likes_buckets[bucket_idx] += post.get("likes", 0)
-                comments_buckets[bucket_idx] += post.get("comments", 0)
-                shares_buckets[bucket_idx] += post.get("shares", 0)
-            except Exception as e:
-                print(f"Error parsing date {created_at}: {e}")
-    
-    # Build chart in chronological order (oldest to newest)
     for i in range(8):
+        hours_label = f"{(7-i) * 3}h ago"
+        x_count = 0
+        ig_count = 0
+        tt_count = 0
+        for comment in our_comments:
+            posted_at = comment.get("posted_at")
+            if posted_at:
+                try:
+                    dt = datetime.fromisoformat(posted_at.replace('Z', '+00:00'))
+                    hours_ago = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
+                    bucket_idx = min(int(hours_ago / 3), 7)
+                    if bucket_idx == (7 - i):
+                        platform = comment.get("platform", "")
+                        if platform == "x":
+                            x_count += 1
+                        elif platform == "instagram":
+                            ig_count += 1
+                        elif platform == "tiktok":
+                            tt_count += 1
+                except Exception:
+                    pass
         chart.append({
-            "time": f"{(7-i) * 3}h ago",
-            "Likes": likes_buckets[7-i],
-            "Comments": comments_buckets[7-i],
-            "Shares": shares_buckets[7-i],
+            "time": hours_label,
+            "tiktok": tt_count,
+            "instagram": ig_count,
+            "x": x_count,
         })
 
     return {
         "stats": stats,
         "platformHealth": platform_health,
         "chart": chart,
-        "total_comments_posted": 10,  # Demo data
+        "total_comments_posted": comments_posted,
         "total_likes_received": total_likes,
-        "total_replies_received": total_comments,
-        "posts_tracked": len(tracked_posts),
+        "total_replies_received": total_replies,
+        "posts_tracked": len(our_comments),
         "active_platforms": active,
         "pending_reviews": pending_reviews,
     }

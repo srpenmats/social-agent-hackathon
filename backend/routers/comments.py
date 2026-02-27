@@ -149,14 +149,26 @@ async def list_saved_comments(
 
     result = (
         db.table("saved_comments")
-        .select("*, engagements(id, platform, comment_text, posted_at)", count="exact")
+        .select("*", count="exact")
         .order("saved_at", desc=True)
         .range(offset, offset + limit - 1)
         .execute()
     )
 
+    # Manually join engagement data for each saved comment
+    items = []
+    for sc in (result.data or []):
+        engagement_data = None
+        if sc.get("engagement_id"):
+            try:
+                eng = db.table("engagements").select("id, platform, comment_text, posted_at").eq("id", sc["engagement_id"]).single().execute()
+                engagement_data = eng.data
+            except Exception:
+                pass
+        items.append({**sc, "engagement": engagement_data})
+
     return {
-        "items": result.data or [],
+        "items": items,
         "total": result.count or 0,
         "page": page,
         "limit": limit,
