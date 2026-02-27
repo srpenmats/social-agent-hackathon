@@ -11,6 +11,7 @@ from routers import (
     connections,
     dashboard,
     db_init,
+    db_migrate,
     db_seed,
     demo,
     discovery,
@@ -64,6 +65,7 @@ app.include_router(demo.router)
 app.include_router(discovery.router)
 app.include_router(discovery_enhanced.router)
 app.include_router(db_init.router)
+app.include_router(db_migrate.router)
 app.include_router(db_seed.router)
 app.include_router(quickfix.router)
 app.include_router(twitter_live.router)
