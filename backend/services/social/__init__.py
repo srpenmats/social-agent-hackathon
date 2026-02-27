@@ -1,22 +1,22 @@
 """Social platform integrations — Instagram, Twitter/X, TikTok, and discovery."""
 
 try:
-    from backend.services.social.instagram import InstagramService
+    from services.social.instagram import InstagramService
 except ImportError:
     InstagramService = None  # type: ignore[assignment,misc]
 
 try:
-    from backend.services.social.twitter import TwitterService
+    from services.social.twitter import TwitterService
 except ImportError:
     TwitterService = None  # type: ignore[assignment,misc]
 
 try:
-    from backend.services.social.tiktok import TikTokService
+    from services.social.tiktok import TikTokService
 except ImportError:
     TikTokService = None  # type: ignore[assignment,misc]
 
 try:
-    from backend.services.social.discovery import DiscoveryService
+    from services.social.discovery import DiscoveryService
 except ImportError:
     DiscoveryService = None  # type: ignore[assignment,misc]
 

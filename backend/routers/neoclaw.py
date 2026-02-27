@@ -12,9 +12,9 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
-from backend.config import get_settings
-from backend.db.connection import get_supabase_admin
-from backend.schemas.neoclaw import (
+from config import get_settings
+from db.connection import get_supabase_admin
+from schemas.neoclaw import (
     AgentConfigResponse,
     BulkIngestRequest,
     BulkIngestResponse,
@@ -29,7 +29,7 @@ from backend.schemas.neoclaw import (
     VideoIngestRequest,
     VideoIngestResponse,
 )
-from backend.services.neoclaw_queue import TaskQueue
+from services.neoclaw_queue import TaskQueue
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +86,8 @@ async def _process_video_ingest(
     # 2. Attempt comment generation + risk scoring pipeline
     candidates: list[dict[str, Any]] = []
     try:
-        from backend.services.ai.comment_generator import CommentGenerator
-        from backend.services.ai.risk_scorer import RiskScorer
+        from services.ai.comment_generator import CommentGenerator
+        from services.ai.risk_scorer import RiskScorer
 
         video_context = {
             "video_id": video_id,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from backend.config import get_settings
+from config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def init_clients() -> None:
     
     # Use SQLite for now (simple and reliable)
     # PostgreSQL integration can be added later if needed
-    from backend.db.sqlite_store import SQLiteClient, init_sqlite_db
+    from db.sqlite_store import SQLiteClient, init_sqlite_db
     init_sqlite_db()
     _client = SQLiteClient()
     _admin = SQLiteClient()

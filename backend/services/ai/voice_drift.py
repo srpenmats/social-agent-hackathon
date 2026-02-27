@@ -12,9 +12,9 @@ import math
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from backend.db.connection import get_supabase_admin
-from backend.services.ai.brand_voice import BrandVoiceService
-from backend.services.ai.embeddings import EmbeddingsService, _cosine_similarity
+from db.connection import get_supabase_admin
+from services.ai.brand_voice import BrandVoiceService
+from services.ai.embeddings import EmbeddingsService, _cosine_similarity
 
 logger = logging.getLogger(__name__)
 

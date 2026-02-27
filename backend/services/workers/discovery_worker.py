@@ -86,7 +86,7 @@ class DiscoveryWorker:
 
     async def run(self) -> None:
         """Main discovery loop."""
-        from backend.services.social.discovery import DiscoveryService
+        from services.social.discovery import DiscoveryService
 
         logger.info("Discovery worker started for %s (interval=%ds)", self._platform, self._interval)
 

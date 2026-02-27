@@ -14,8 +14,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-from backend.db.connection import get_supabase_admin
-from backend.services.ai.embeddings import EmbeddingsService
+from db.connection import get_supabase_admin
+from services.ai.embeddings import EmbeddingsService
 
 logger = logging.getLogger(__name__)
 

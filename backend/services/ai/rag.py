@@ -10,8 +10,8 @@ import json
 import logging
 from typing import Any
 
-from backend.services.ai.brand_voice import BrandVoiceService
-from backend.services.ai.embeddings import EmbeddingsService
+from services.ai.brand_voice import BrandVoiceService
+from services.ai.embeddings import EmbeddingsService
 
 logger = logging.getLogger(__name__)
 
