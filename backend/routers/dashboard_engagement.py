@@ -94,8 +94,14 @@ async def dashboard_overview(
     
     unique_hashtags = len(set(all_hashtags))
     
-    # Check for active platforms
-    active = 1 if total_posts > 0 else 0
+    # Count active platforms (platforms with discovered posts)
+    try:
+        # Check all platforms for discovered content
+        all_platforms = db.table("discovered_videos").select("platform").execute()
+        active_platforms_set = set(p.get("platform") for p in (all_platforms.data or []) if p.get("platform"))
+        active = len(active_platforms_set)
+    except:
+        active = 1 if total_posts > 0 else 0
         
     # Review queue count
     try:
