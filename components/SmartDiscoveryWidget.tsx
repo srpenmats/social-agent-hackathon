@@ -110,16 +110,18 @@ export default function SmartDiscoveryWidget() {
       <div className="p-4 space-y-4 bg-[#0B0F1A]">
         <div>
           <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider">
-            Search Keywords
+            What are you looking for? (Context)
           </label>
-          <input
-            type="text"
+          <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g., OpenClaw security, AI agent vulnerabilities..."
-            className="w-full px-4 py-2.5 bg-[#131828] border border-[#2D3748] rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#1DA1F2]/50 transition-colors"
-            onKeyPress={(e) => e.key === 'Enter' && handleDiscover()}
+            placeholder="Describe what you're looking for... e.g., 'Posts about OpenClaw security issues where Agent Trust Hub could help' or 'Discussions about AI agent plugins and malicious skills'"
+            className="w-full px-4 py-2.5 bg-[#131828] border border-[#2D3748] rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#1DA1F2]/50 transition-colors resize-none"
+            rows={3}
           />
+          <p className="text-xs text-gray-500 mt-1">
+            💡 Tip: Be specific about what type of posts you want to find and why
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -221,7 +223,10 @@ export default function SmartDiscoveryWidget() {
 
                     {/* Analysis */}
                     <div className="space-y-2 mb-3 p-3 bg-[#131828] rounded border border-[#2D3748]">
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="text-xs font-semibold text-[#1DA1F2] uppercase tracking-wider mb-2">
+                        📊 Analysis
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs mb-2">
                         <div>
                           <span className="text-gray-500">Relevance:</span>
                           <span className="text-white font-bold ml-2">{post.relevance_score.toFixed(1)}/10</span>
@@ -231,33 +236,44 @@ export default function SmartDiscoveryWidget() {
                           <span className="text-white font-bold ml-2">{post.engagement_potential.toFixed(1)}/10</span>
                         </div>
                       </div>
-                      <div className="text-xs">
+                      <div className="text-xs mb-2">
                         <span className="text-gray-500">Persona:</span>
                         <span className="text-[#1DA1F2] font-medium ml-2">{post.persona_recommendation}</span>
                       </div>
-                      <div className="text-xs text-gray-400 italic">
-                        💡 {post.angle_summary}
-                      </div>
-                      <div className="text-[10px] text-gray-500 pt-2 border-t border-[#2D3748]">
-                        {post.reasoning}
+                      
+                      <div className="pt-2 border-t border-[#2D3748]">
+                        <div className="text-xs font-semibold text-[#10B981] mb-1">
+                          ✅ Why Respond to This Post:
+                        </div>
+                        <div className="text-xs text-gray-400 italic mb-2">
+                          💡 {post.angle_summary}
+                        </div>
+                        <div className="text-[10px] text-gray-500">
+                          {post.reasoning}
+                        </div>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleViewPost(post.url)}
-                        className="flex-1 px-3 py-2 bg-[#1E2538] text-[#1DA1F2] border border-[#1DA1F2]/30 rounded text-xs font-medium hover:bg-[#1DA1F2]/10 transition-colors flex items-center justify-center gap-1"
+                    <div className="space-y-2">
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full px-3 py-2.5 bg-[#1DA1F2] text-white rounded text-sm font-medium hover:bg-[#1DA1F2]/90 transition-colors flex items-center justify-center gap-2"
                       >
-                        <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                        View Post
-                      </button>
+                        <span className="material-symbols-outlined text-[16px]">open_in_new</span>
+                        View Post on Twitter
+                      </a>
+                      <div className="text-[10px] text-gray-500 px-2 truncate">
+                        🔗 {post.url}
+                      </div>
                       <button
                         onClick={() => handleAddToQueue(post)}
-                        className="flex-1 px-3 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 rounded text-xs font-medium hover:bg-[#1DA1F2]/20 transition-colors flex items-center justify-center gap-1"
+                        className="w-full px-3 py-2 bg-[#1DA1F2]/10 text-[#1DA1F2] border border-[#1DA1F2]/30 rounded text-sm font-medium hover:bg-[#1DA1F2]/20 transition-colors flex items-center justify-center gap-1"
                       >
                         <span className="material-symbols-outlined text-[14px]">add_circle</span>
-                        Add to Queue
+                        Add to Review Queue
                       </button>
                     </div>
                   </div>
