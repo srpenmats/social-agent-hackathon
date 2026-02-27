@@ -18,6 +18,7 @@ from routers import (
     hubs,
     neoclaw,
     personas,
+    quickfix,
     review,
     settings,
 )
@@ -55,6 +56,7 @@ app.include_router(discovery.router)
 app.include_router(discovery_enhanced.router)
 app.include_router(db_init.router)
 app.include_router(db_seed.router)
+app.include_router(quickfix.router)
 
 
 @app.get("/api/v1/health")
