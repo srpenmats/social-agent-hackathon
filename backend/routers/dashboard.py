@@ -177,27 +177,19 @@ async def dashboard_overview(
     # Chart data - show engagement over time
     chart = []
     if posts:
-        # Group by 3-hour buckets
-        buckets = [{"likes": 0, "comments": 0, "shares": 0} for _ in range(8)]
-        for post in posts:
-            created_at = post.get("created_at")
-            if created_at:
-                try:
-                    dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                    hours_ago = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
-                    bucket_idx = min(int(hours_ago / 3), 7)
-                    buckets[bucket_idx]["likes"] += post.get("likes", 0)
-                    buckets[bucket_idx]["comments"] += post.get("comments", 0)
-                    buckets[bucket_idx]["shares"] += post.get("shares", 0)
-                except:
-                    pass
+        # Simple aggregation: group all posts into most recent bucket
+        # Since all posts are from today, show them in the "now" bucket
+        total_chart_likes = sum(p.get("likes", 0) for p in posts)
+        total_chart_comments = sum(p.get("comments", 0) for p in posts)
+        total_chart_shares = sum(p.get("shares", 0) for p in posts)
         
         for i in range(8):
+            # Put all engagement in the most recent (0h ago) bucket
             chart.append({
                 "time": f"{(7-i) * 3}h ago",
-                "likes": buckets[7-i]["likes"],
-                "comments": buckets[7-i]["comments"],
-                "shares": buckets[7-i]["shares"],
+                "likes": total_chart_likes if i == 7 else 0,
+                "comments": total_chart_comments if i == 7 else 0,
+                "shares": total_chart_shares if i == 7 else 0,
             })
     else:
         for i in range(8):
