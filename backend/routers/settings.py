@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-fromdb.connection import get_supabase_admin
-frommiddleware.auth import require_role
-fromschemas.settings import (
+from db.connection import get_supabase_admin
+from middleware.auth import require_role
+from schemas.settings import (
     DiscoveryConfigResponse,
     DiscoveryConfigUpdateRequest,
     ExecutionConfigResponse,
@@ -88,7 +88,7 @@ async def update_voice_config(body: VoiceConfigUpdateRequest, user: dict = requi
 @router.post("/voice/test", response_model=VoiceTestResponse)
 async def test_voice(body: VoiceTestRequest, user: dict = require_role("admin")):
     try:
-        fromservices.ai.comment_generator import CommentGenerator
+        from services.ai.comment_generator import CommentGenerator
         generator = CommentGenerator()
         candidates = await generator.generate(body.video_context)
         return VoiceTestResponse(candidates=candidates)

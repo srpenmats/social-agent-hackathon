@@ -104,13 +104,13 @@ class ExecutionWorker:
 
         platform_id = str(row.data["id"])
         if self._platform == "tiktok":
-            fromservices.social.tiktok import TikTokService
+            from services.social.tiktok import TikTokService
             return TikTokService(platform_id, self._supabase)
         elif self._platform == "instagram":
-            fromservices.social.instagram import InstagramService
+            from services.social.instagram import InstagramService
             return InstagramService(platform_id, self._supabase)
         elif self._platform == "twitter":
-            fromservices.social.twitter import TwitterService
+            from services.social.twitter import TwitterService
             return TwitterService(platform_id, self._supabase)
         return None
 

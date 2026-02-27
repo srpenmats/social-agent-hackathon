@@ -10,8 +10,8 @@ from typing import Any
 
 import httpx
 
-fromconfig import get_settings
-fromservices.social.oauth import (
+from config import get_settings
+from services.social.oauth import (
     build_oauth_url,
     decrypt_credentials,
     encrypt_credentials,

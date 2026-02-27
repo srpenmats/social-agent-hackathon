@@ -50,7 +50,7 @@ class AnalyticsWorker:
 
         if isinstance(posted_at_raw, str):
             try:
-                posted_at = datetime.fromisoformat(posted_at_raw.replace("Z", "+00:00"))
+                posted_at = datetime.from isoformat(posted_at_raw.replace("Z", "+00:00"))
             except ValueError:
                 return None
         else:
@@ -74,7 +74,7 @@ class AnalyticsWorker:
                     continue
                 if isinstance(checked_raw, str):
                     try:
-                        checked = datetime.fromisoformat(checked_raw.replace("Z", "+00:00"))
+                        checked = datetime.from isoformat(checked_raw.replace("Z", "+00:00"))
                     except ValueError:
                         continue
                 else:
@@ -110,13 +110,13 @@ class AnalyticsWorker:
 
         platform_id = str(row.data["id"])
         if self._platform == "tiktok":
-            fromservices.social.tiktok import TikTokService
+            from services.social.tiktok import TikTokService
             return TikTokService(platform_id, self._supabase)
         elif self._platform == "instagram":
-            fromservices.social.instagram import InstagramService
+            from services.social.instagram import InstagramService
             return InstagramService(platform_id, self._supabase)
         elif self._platform == "twitter":
-            fromservices.social.twitter import TwitterService
+            from services.social.twitter import TwitterService
             return TwitterService(platform_id, self._supabase)
         return None
 

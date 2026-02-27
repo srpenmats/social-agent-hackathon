@@ -98,7 +98,7 @@ class TaskQueue:
 
         # Check expiry
         if task.get("expires_at"):
-            expires = datetime.fromisoformat(task["expires_at"].replace("Z", "+00:00"))
+            expires = datetime.from isoformat(task["expires_at"].replace("Z", "+00:00"))
             if expires < datetime.now(timezone.utc):
                 self.client.table("neoclaw_tasks").update(
                     {"status": "expired"}

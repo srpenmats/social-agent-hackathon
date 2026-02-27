@@ -75,13 +75,13 @@ class DiscoveryService:
         platform_id = str(row.data["id"])
 
         if platform == "tiktok":
-            fromservices.social.tiktok import TikTokService
+            from services.social.tiktok import TikTokService
             return TikTokService(platform_id, self._supabase)
         elif platform == "instagram":
-            fromservices.social.instagram import InstagramService
+            from services.social.instagram import InstagramService
             return InstagramService(platform_id, self._supabase)
         elif platform == "twitter":
-            fromservices.social.twitter import TwitterService
+            from services.social.twitter import TwitterService
             return TwitterService(platform_id, self._supabase)
         return None
 
@@ -172,11 +172,11 @@ class DiscoveryService:
         if discovered_at:
             if isinstance(discovered_at, str):
                 try:
-                    dt = datetime.fromisoformat(discovered_at.replace("Z", "+00:00"))
+                    dt = datetime.from isoformat(discovered_at.replace("Z", "+00:00"))
                 except ValueError:
                     dt = None
             elif isinstance(discovered_at, (int, float)):
-                dt = datetime.fromtimestamp(discovered_at, tz=timezone.utc)
+                dt = datetime.from timestamp(discovered_at, tz=timezone.utc)
             else:
                 dt = discovered_at
             if dt:

@@ -2,8 +2,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-fromdb.connection import get_supabase_admin
-frommiddleware.auth import CurrentUser
+from db.connection import get_supabase_admin
+from middleware.auth import CurrentUser
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["hubs"])
@@ -130,7 +130,7 @@ async def hub_stats(platform: str, user: CurrentUser):
 async def sync_twitter(user: CurrentUser):
     """Pull latest tweets from Twitter API and update the local DB."""
     try:
-        fromscripts.sync_twitter import fetch_tweets, sync
+        from scripts.sync_twitter import fetch_tweets, sync
         data = fetch_tweets()
         sync(data)
         return {"status": "ok", "message": "Twitter sync complete"}
@@ -143,7 +143,7 @@ async def sync_twitter(user: CurrentUser):
 async def sync_instagram(user: CurrentUser):
     """Re-seed Instagram finance Reels into the local DB."""
     try:
-        fromscripts.seed_instagram import seed
+        from scripts.seed_instagram import seed
         seed()
         return {"status": "ok", "message": "Instagram sync complete"}
     except Exception as e:

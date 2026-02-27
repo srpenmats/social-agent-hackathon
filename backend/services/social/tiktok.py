@@ -10,8 +10,8 @@ from typing import Any
 
 import httpx
 
-fromconfig import get_settings
-fromservices.social.oauth import decrypt_credentials, encrypt_credentials
+from config import get_settings
+from services.social.oauth import decrypt_credentials, encrypt_credentials
 
 
 # ---------------------------------------------------------------------------
@@ -175,9 +175,9 @@ class TikTokService:
         last_activity_raw = data.get("last_activity")
         if last_activity_raw:
             if isinstance(last_activity_raw, (int, float)):
-                last_activity = datetime.fromtimestamp(last_activity_raw, tz=timezone.utc)
+                last_activity = datetime.from timestamp(last_activity_raw, tz=timezone.utc)
             else:
-                last_activity = datetime.fromisoformat(str(last_activity_raw).replace("Z", "+00:00"))
+                last_activity = datetime.from isoformat(str(last_activity_raw).replace("Z", "+00:00"))
             age_seconds = (datetime.now(timezone.utc) - last_activity).total_seconds()
         else:
             last_activity = None

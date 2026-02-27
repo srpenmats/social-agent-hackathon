@@ -14,8 +14,8 @@ import re
 from pathlib import Path
 from typing import Any
 
-fromdb.connection import get_supabase_admin
-fromservices.ai.embeddings import EmbeddingsService
+from db.connection import get_supabase_admin
+from services.ai.embeddings import EmbeddingsService
 
 logger = logging.getLogger(__name__)
 
@@ -348,7 +348,7 @@ class BrandVoiceService:
                                 absolute_bans.append(cleaned)
 
         # Deduplicate
-        absolute_bans = list(dict.fromkeys(absolute_bans))
+        absolute_bans = list(dict.from keys(absolute_bans))
 
         return {
             "absolute": absolute_bans,

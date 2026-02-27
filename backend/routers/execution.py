@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter
 
-fromdb.connection import get_supabase_admin
-frommiddleware.auth import require_role
-fromschemas.settings import KillSwitchRequest
+from db.connection import get_supabase_admin
+from middleware.auth import require_role
+from schemas.settings import KillSwitchRequest
 
 router = APIRouter(tags=["execution"])
 

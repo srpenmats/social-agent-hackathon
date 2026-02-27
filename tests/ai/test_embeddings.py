@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-fromservices.ai.embeddings import EmbeddingsService, _cosine_similarity
+from services.ai.embeddings import EmbeddingsService, _cosine_similarity
 
 
 class TestCosineSimilarity:

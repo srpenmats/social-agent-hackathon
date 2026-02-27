@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 
-fromdb.connection import get_supabase_admin
-frommiddleware.auth import CurrentUser
-fromschemas.comments import (
+from db.connection import get_supabase_admin
+from middleware.auth import CurrentUser
+from schemas.comments import (
     CommentDetail,
     CommentListResponse,
     CommentSaveRequest,
@@ -81,7 +81,7 @@ async def get_comment(comment_id: int, user: CurrentUser):
         )
         if risk_result.data:
             rs = risk_result.data[0]
-            fromschemas.comments import RiskBreakdown
+            from schemas.comments import RiskBreakdown
             risk_breakdown = RiskBreakdown(
                 total_score=rs.get("total_score", 0),
                 blocklist_score=rs.get("blocklist_score", 0),

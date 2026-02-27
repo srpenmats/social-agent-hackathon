@@ -8,8 +8,8 @@ from typing import Any
 
 import httpx
 
-fromconfig import get_settings
-fromdb.connection import get_supabase_admin
+from config import get_settings
+from db.connection import get_supabase_admin
 
 logger = logging.getLogger(__name__)
 

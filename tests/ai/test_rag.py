@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-fromservices.ai.rag import RAGService, _build_query_from_context
+from services.ai.rag import RAGService, _build_query_from_context
 
 
 class TestBuildQueryFromContext:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-frommiddleware.auth import CurrentUser
+from middleware.auth import CurrentUser
 
 router = APIRouter(tags=["personas"])
 

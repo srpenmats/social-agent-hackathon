@@ -61,9 +61,9 @@ class WorkerManager:
 
         Returns a dict of worker_key -> status.
         """
-        fromservices.workers.analytics_worker import AnalyticsWorker
-        fromservices.workers.discovery_worker import DiscoveryWorker
-        fromservices.workers.execution_worker import ExecutionWorker
+        from services.workers.analytics_worker import AnalyticsWorker
+        from services.workers.discovery_worker import DiscoveryWorker
+        from services.workers.execution_worker import ExecutionWorker
 
         result: dict[str, str] = {}
 

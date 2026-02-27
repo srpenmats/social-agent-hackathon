@@ -34,7 +34,7 @@ def init_clients() -> None:
             logger.warning(f"Supabase connection failed: {e}")
 
     # Fallback to local SQLite
-    fromdb.sqlite_store import SQLiteClient, init_sqlite_db
+    from db.sqlite_store import SQLiteClient, init_sqlite_db
     init_sqlite_db()
     _client = SQLiteClient()
     _admin = SQLiteClient()
