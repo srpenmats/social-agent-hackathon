@@ -22,6 +22,7 @@ from routers import (
     neoclaw,
     personas,
     platform_connection,
+    platform_direct,
     platform_simple,
     populate,
     populate_engagements,
@@ -62,6 +63,7 @@ app.include_router(personas.router)
 app.include_router(debug.router)
 app.include_router(agent_smart.router)
 app.include_router(platform_connection.router)
+app.include_router(platform_direct.router)
 app.include_router(platform_simple.router)
 app.include_router(scheduler.router)
 app.include_router(hubs.router)
