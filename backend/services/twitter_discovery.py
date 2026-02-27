@@ -138,7 +138,14 @@ class TwitterDiscoveryService:
                 }
             }
             
-            self.db.table("discovered_posts").upsert(record, on_conflict="post_id").execute()
+            # Check if post already exists
+            existing = self.db.table("discovered_posts").select("id").eq("post_id", record["post_id"]).execute()
+            if existing.data:
+                # Update existing
+                self.db.table("discovered_posts").update(record).eq("post_id", record["post_id"]).execute()
+            else:
+                # Insert new
+                self.db.table("discovered_posts").insert(record).execute()
             stored_count += 1
         
         return {
