@@ -94,8 +94,13 @@ async def dashboard_overview(
     
     unique_hashtags = len(set(all_hashtags))
     
-    # Active platforms count (0 since no actual platform connections)
-    active = 0
+    # Count active/connected platforms
+    try:
+        platforms_resp = db.table("platforms").select("name, status").execute()
+        active = sum(1 for p in (platforms_resp.data or []) if p.get("status") == "connected")
+    except Exception:
+        # Platforms table doesn't exist yet
+        active = 0
         
     # Review queue count
     try:

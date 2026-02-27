@@ -224,6 +224,17 @@ def init_postgres_db(database_url: str):
             decision TEXT,
             queued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        
+        CREATE TABLE IF NOT EXISTS platforms (
+            id SERIAL PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            display_name TEXT,
+            status TEXT DEFAULT 'disconnected',
+            credentials JSONB,
+            connected_at TIMESTAMP,
+            last_verified TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     """)
     
     conn.commit()
