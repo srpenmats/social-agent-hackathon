@@ -10,6 +10,7 @@ from routers import (
     connections,
     dashboard,
     db_init,
+    db_seed,
     demo,
     discovery,
     discovery_enhanced,
@@ -53,6 +54,7 @@ app.include_router(demo.router)
 app.include_router(discovery.router)
 app.include_router(discovery_enhanced.router)
 app.include_router(db_init.router)
+app.include_router(db_seed.router)
 
 
 @app.get("/api/v1/health")
