@@ -26,6 +26,11 @@ interface SmartDiscoveryResponse {
   analyzed_posts: number;
   recommendations: PostAnalysis[];
   top_post: PostAnalysis | null;
+  
+  // GenClaw intelligent layer
+  extracted_keywords?: string;
+  search_strategy?: string;
+  context_summary?: string;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || process.env.REACT_APP_API_BASE || 'https://social-agent-hackathon-production.up.railway.app/api/v1';
@@ -168,6 +173,27 @@ export default function SmartDiscoveryWidget() {
       <div className="flex-1 overflow-y-auto scroller">
         {results && (
           <div className="p-4 space-y-4">
+            {/* GenClaw Intelligence Summary */}
+            {results.context_summary && (
+              <div className="p-4 bg-gradient-to-r from-[#1DA1F2]/10 to-[#10B981]/10 border border-[#1DA1F2]/30 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-[#1DA1F2] text-[20px] mt-0.5">psychology</span>
+                  <div className="flex-1">
+                    <div className="text-xs font-semibold text-[#1DA1F2] mb-1">GenClaw Intelligence</div>
+                    <p className="text-sm text-white leading-relaxed">{results.context_summary}</p>
+                    {results.extracted_keywords && results.extracted_keywords !== results.query && (
+                      <div className="mt-2 text-xs text-gray-400">
+                        <span className="text-gray-500">Searched:</span>
+                        <span className="ml-2 px-2 py-0.5 bg-[#1DA1F2]/20 text-[#1DA1F2] rounded font-mono">
+                          {results.extracted_keywords}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Summary */}
             <div className="p-3 bg-[#1E2538]/50 border border-[#2D3748] rounded-lg">
               <div className="flex items-center justify-between text-xs">

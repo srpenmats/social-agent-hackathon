@@ -1,6 +1,11 @@
 """
 Smart Discovery endpoint for X/Twitter Hub.
 User provides context/keywords → GenClaw discovers + analyzes posts → Returns recommendations.
+
+GenClaw acts as intelligent layer:
+- Understands natural language queries
+- Extracts optimal keywords
+- Provides contextual analysis
 """
 
 import logging
@@ -10,9 +15,32 @@ from fastapi import APIRouter, HTTPException
 
 from db.connection import get_supabase_admin
 from services.twitter_discovery import TwitterDiscoveryService
+from services.intelligent_query import process_user_query_with_neoclaw, generate_response_summary
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["hubs"])
+
+
+# Load Agent Trust Hub context
+AGENT_TRUST_HUB_CONTEXT = """
+Agent Trust Hub by Gen Digital provides security infrastructure for AI agents:
+
+- Skills Scanner: Free pre-install verification of agent skills (like npm audit for AI)
+- Marketplace: Curated skills with 4-tier security ratings (verified, audited, community, unverified)
+- Sage: Runtime monitoring with 200+ security rules (open source)
+- Vercel Partnership: Integrated into skills.sh for 6M developers
+
+Key Statistics:
+- 18K+ agent instances exposed publicly
+- 12-15% found to be malicious
+- 500M Gen users benefit from security infrastructure
+
+Focus Areas:
+- Supply chain attacks on AI agents
+- Malicious skills/plugins
+- OWASP LLM top 10 risks
+- Agent trust and verification
+"""
 
 
 def determine_min_engagement_from_context(query: str) -> int:
@@ -81,67 +109,65 @@ class PostAnalysis(BaseModel):
 
 
 class SmartDiscoveryResponse(BaseModel):
-    """Results from smart discovery."""
+    """Results from smart discovery with GenClaw analysis."""
     query: str
     found_posts: int
     analyzed_posts: int
     recommendations: list[PostAnalysis]
     top_post: Optional[PostAnalysis] = None
+    
+    # GenClaw intelligent layer
+    extracted_keywords: Optional[str] = None
+    search_strategy: Optional[str] = None
+    context_summary: Optional[str] = None
 
 
 @router.post("/api/v1/hubs/x/smart-discovery")
 async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryResponse:
     """
-    Smart Discovery: User provides context, GenClaw intelligently discovers + analyzes posts.
+    Smart Discovery with GenClaw Intelligence.
     
     Flow:
-    1. Extract keywords from conversational query
-    2. GenClaw determines optimal min_engagement based on context
+    1. GenClaw analyzes user query and extracts optimal keywords
+    2. GenClaw determines search strategy based on Agent Trust Hub context
     3. Search Twitter API with extracted keywords
-    4. For each post, run Jen-style analysis
-    5. Return ranked recommendations
+    4. Analyze each post for relevance
+    5. GenClaw generates contextual summary of results
+    6. Return ranked recommendations with GenClaw insights
     """
     
-    # Extract keywords from conversational query
-    query = request.query.strip()
+    # STEP 1: GenClaw Intelligence Layer
+    logger.info(f"GenClaw analyzing query: {request.query}")
     
-    # If query is conversational (like "Give me 10 top posts for..."), extract keywords
-    conversational_patterns = [
-        "give me",
-        "show me",
-        "find me",
-        "search for",
-        "looking for",
-        "i want",
-        "can you find",
-        "get me",
-        "top posts",
-        "best posts",
-    ]
+    try:
+        query_analysis = await process_user_query_with_neoclaw(
+            user_input=request.query,
+            context_docs=AGENT_TRUST_HUB_CONTEXT
+        )
+        
+        extracted_keywords = query_analysis.get("extracted_keywords", request.query)
+        logger.info(f"GenClaw extracted keywords: {extracted_keywords}")
+        logger.info(f"GenClaw strategy: {query_analysis.get('search_strategy')}")
+        
+    except Exception as e:
+        logger.warning(f"GenClaw analysis failed, using fallback: {e}")
+        extracted_keywords = request.query
+        query_analysis = {
+            "extracted_keywords": extracted_keywords,
+            "search_strategy": "Basic keyword search",
+            "relevance_criteria": "Posts matching keywords"
+        }
     
-    query_lower = query.lower()
-    for pattern in conversational_patterns:
-        if pattern in query_lower:
-            # Extract keywords after the pattern
-            query = query_lower.replace(pattern, "").strip()
-            # Remove common filler words
-            filler_words = ["the", "a", "an", "for", "about", "on", "posts", "post"]
-            query_words = [w for w in query.split() if w not in filler_words and not w.isdigit()]
-            query = " ".join(query_words)
-            break
+    # STEP 2: Determine min_engagement
+    min_engagement = determine_min_engagement_from_context(extracted_keywords)
+    logger.info(f"GenClaw determined min_engagement={min_engagement} for keywords: {extracted_keywords}")
     
-    logger.info(f"Original query: {request.query} | Extracted keywords: {query}")
-    
-    # INTELLIGENT LAYER: Determine min_engagement based on context
-    min_engagement = determine_min_engagement_from_context(query)
-    logger.info(f"GenClaw determined min_engagement={min_engagement} for keywords: {query}")
-    
-    # Step 1: Discover posts via Twitter API
+    # STEP 3: Discover posts via Twitter API
     twitter_service = TwitterDiscoveryService()
     
     try:
         discovered_posts = await twitter_service.discover_by_query(
-            query=query,  # Use extracted keywords
+            query=extracted_keywords,
             max_results=request.max_results,
             min_engagement=min_engagement
         )
@@ -151,14 +177,17 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
     
     if not discovered_posts:
         return SmartDiscoveryResponse(
-            query=request.query,  # Return original query for display
+            query=request.query,
             found_posts=0,
             analyzed_posts=0,
             recommendations=[],
-            top_post=None
+            top_post=None,
+            extracted_keywords=extracted_keywords,
+            search_strategy=query_analysis.get("search_strategy"),
+            context_summary="No posts found matching these keywords. Try broader search terms."
         )
     
-    # Step 2: Analyze each post with GenClaw
+    # STEP 4: Analyze each post
     analyzed_posts = []
     
     for post in discovered_posts:
@@ -169,12 +198,29 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
             logger.warning(f"Analysis failed for post {post.get('id')}: {e}")
             continue
     
-    # Step 3: Sort by recommendation_score (highest first)
+    # STEP 5: Sort by recommendation_score
     analyzed_posts.sort(key=lambda x: x.recommendation_score, reverse=True)
     
-    # Step 4: Store top posts in discovered_videos for tracking
+    # STEP 6: GenClaw generates contextual summary
+    try:
+        context_summary = await generate_response_summary(
+            user_query=request.query,
+            found_posts=[{
+                "author": p.author,
+                "text": p.text,
+                "likes": p.likes,
+                "url": p.url
+            } for p in analyzed_posts[:5]],
+            analysis=query_analysis,
+            context_docs=AGENT_TRUST_HUB_CONTEXT
+        )
+    except Exception as e:
+        logger.warning(f"GenClaw summary generation failed: {e}")
+        context_summary = f"Found {len(analyzed_posts)} relevant posts about {extracted_keywords}."
+    
+    # STEP 7: Store top posts
     db = get_supabase_admin()
-    for analysis in analyzed_posts[:5]:  # Store top 5
+    for analysis in analyzed_posts[:5]:
         try:
             db.table("discovered_videos").insert({
                 "platform": "x",
@@ -186,7 +232,7 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
                 "comments": analysis.replies,
                 "shares": analysis.retweets,
                 "engagement_score": int(analysis.recommendation_score * 10),
-                "hashtags": [request.query],  # Track search query
+                "hashtags": [request.query],
             }).execute()
         except Exception as e:
             logger.warning(f"Failed to store post {analysis.post_id}: {e}")
@@ -196,7 +242,10 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
         found_posts=len(discovered_posts),
         analyzed_posts=len(analyzed_posts),
         recommendations=analyzed_posts,
-        top_post=analyzed_posts[0] if analyzed_posts else None
+        top_post=analyzed_posts[0] if analyzed_posts else None,
+        extracted_keywords=extracted_keywords,
+        search_strategy=query_analysis.get("search_strategy"),
+        context_summary=context_summary
     )
 
 
