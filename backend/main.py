@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.db.connection import init_clients
-from backend.middleware.cors import get_cors_config
-from backend.routers import (
+from db.connection import init_clients
+from middleware.cors import get_cors_config
+from routers import (
     comments,
     connections,
     dashboard,

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 import httpx
 import os
 from datetime import datetime, timezone
-from backend.db.connection import get_supabase_admin
+from db.connection import get_supabase_admin
 
 router = APIRouter(prefix="/api/v1/discovery", tags=["discovery"])
 
