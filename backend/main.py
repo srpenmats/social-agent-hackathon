@@ -19,6 +19,7 @@ from routers import (
     discovery_enhanced,
     execution,
     hubs,
+    jen,
     neoclaw,
     personas,
     platform_connection,
@@ -68,6 +69,7 @@ app.include_router(platform_direct.router)
 app.include_router(platform_simple.router)
 app.include_router(scheduler.router)
 app.include_router(hubs.router)
+app.include_router(jen.router)
 app.include_router(demo.router)
 app.include_router(discovery.router)
 app.include_router(discovery_enhanced.router)
