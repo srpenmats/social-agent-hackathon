@@ -13,6 +13,7 @@ from routers import (
     db_init,
     db_migrate,
     db_seed,
+    debug,
     demo,
     discovery,
     discovery_enhanced,
@@ -57,6 +58,7 @@ app.include_router(connections.router)
 app.include_router(execution.router)
 app.include_router(neoclaw.router)
 app.include_router(personas.router)
+app.include_router(debug.router)
 app.include_router(agent_smart.router)
 app.include_router(platform_connection.router)
 app.include_router(scheduler.router)
