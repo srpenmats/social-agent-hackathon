@@ -205,30 +205,37 @@ async def dashboard_overview(
             }
         )
 
-    # Chart data - comments posted over time
+    # Chart data - comments posted over time for all three platforms
     chart = []
-    if our_comments:
-        # Group by 3-hour buckets
-        buckets = [0] * 8
-        for comment in our_comments:
-            posted_at = comment.get("posted_at")
-            if posted_at:
-                try:
-                    dt = datetime.fromisoformat(posted_at.replace('Z', '+00:00'))
-                    hours_ago = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
-                    bucket_idx = min(int(hours_ago / 3), 7)
-                    buckets[bucket_idx] += 1
-                except:
-                    pass
+    
+    # Group comments by platform and time bucket
+    platform_buckets = {
+        "tiktok": [0] * 8,
+        "instagram": [0] * 8,
+        "x": [0] * 8
+    }
+    
+    for comment in our_comments:
+        platform = comment.get("platform", "unknown")
+        posted_at = comment.get("posted_at")
         
-        for i in range(8):
-            chart.append({
-                "time": f"{(7-i) * 3}h ago",
-                "comments": buckets[7-i],
-            })
-    else:
-        for i in range(8):
-            chart.append({"time": f"{(7-i) * 3}h ago", "comments": 0})
+        if posted_at and platform in platform_buckets:
+            try:
+                dt = datetime.fromisoformat(posted_at.replace('Z', '+00:00'))
+                hours_ago = (datetime.now(timezone.utc) - dt).total_seconds() / 3600
+                bucket_idx = min(int(hours_ago / 3), 7)
+                platform_buckets[platform][bucket_idx] += 1
+            except:
+                pass
+    
+    # Build chart with all three platforms
+    for i in range(8):
+        chart.append({
+            "time": f"{(7-i) * 3}h ago",
+            "tiktok": platform_buckets["tiktok"][7-i],
+            "instagram": platform_buckets["instagram"][7-i],
+            "x": platform_buckets["x"][7-i],
+        })
 
     return {
         "stats": stats,
