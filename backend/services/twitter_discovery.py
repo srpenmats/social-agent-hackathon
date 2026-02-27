@@ -128,14 +128,7 @@ class TwitterDiscoveryService:
                 "retweets": tweet["retweets"],
                 "replies": tweet["replies"],
                 "status": "discovered",
-                "discovered_at": tweet["created_at"],
-                "metadata": {
-                    "author_verified": tweet["author_verified"],
-                    "author_followers": tweet["author_followers"],
-                    "conversation_id": tweet["conversation_id"],
-                    "discovery_query": query,
-                    "discovery_context": context
-                }
+                "discovered_at": tweet["created_at"]
             }
             
             # Check if post already exists
