@@ -21,6 +21,7 @@ from routers import (
     feedback,
     hubs,
     jen,
+    migrations,
     neoclaw,
     personas,
     platform_connection,
@@ -63,6 +64,7 @@ app.include_router(review_posts.router)
 app.include_router(settings.router)
 app.include_router(connections.router)
 app.include_router(execution.router)
+app.include_router(migrations.router)
 app.include_router(neoclaw.router)
 app.include_router(personas.router)
 app.include_router(debug.router)
