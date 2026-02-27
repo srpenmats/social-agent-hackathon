@@ -6,6 +6,7 @@ Just verifies Bearer Token works and marks platform as connected.
 from fastapi import APIRouter
 from datetime import datetime, timezone
 import os
+import json
 
 from db.connection import get_supabase_admin
 
@@ -36,10 +37,10 @@ async def connect_twitter_simple():
             "name": "x",
             "display_name": "X / Twitter",
             "status": "connected",
-            "credentials": {
+            "credentials": json.dumps({
                 "has_bearer_token": True,
                 "connection_type": "api_token"
-            },
+            }),
             "connected_at": datetime.now(timezone.utc).isoformat(),
             "last_verified": datetime.now(timezone.utc).isoformat(),
         }
