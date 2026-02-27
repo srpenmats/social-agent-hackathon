@@ -1,4 +1,4 @@
-from backend.config import get_settings
+from config import get_settings
 
 
 def get_cors_config() -> dict:
