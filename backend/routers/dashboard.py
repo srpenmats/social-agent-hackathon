@@ -56,15 +56,13 @@ async def dashboard_overview(
     - Total Shares/Retweets
     """
     db = get_supabase_admin()
-    since = _timeframe_start(timeframe)
 
-    # Get discovered posts (real Twitter data)
+    # Get discovered posts (real Twitter data) - NO timeframe filter
     try:
         discovered = (
             db.table("discovered_videos")
             .select("id, platform, likes, comments, shares, views, hashtags, created_at")
             .eq("platform", "x")
-            .gte("created_at", since)
             .execute()
         )
         posts = discovered.data or []
