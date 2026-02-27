@@ -13,13 +13,45 @@ import json
 from typing import Dict, List, Optional
 
 
+def create_condensed_context(full_context: str) -> str:
+    """
+    Create a condensed version of Jen context for Claude prompts.
+    
+    Extracts the most critical information:
+    - Agent Trust Hub products (Scanner, Sage, Marketplace)
+    - Key statistics (18K instances, 15% malicious rate)
+    - Jen's personas (Observer, Advisor, Connector)
+    - Core voice guidelines
+    
+    Target: ~8KB of dense, actionable context instead of 260KB full docs.
+    """
+    
+    # For now, use the first ~8000 chars which prioritizes the soul document
+    # (loaded first, contains densest info: identity, products, stats)
+    # TODO: Could build smarter extraction if needed
+    condensed = full_context[:8000]
+    
+    # Add explicit Agent Trust Hub summary if not prominent enough
+    if "Agent Trust Hub" not in condensed[:2000]:
+        ath_summary = """
+AGENT TRUST HUB (Gen Digital):
+- Products: Skills Scanner (free pre-install verification), Marketplace (curated audited skills), 
+  Sage (runtime monitoring with 200+ rules), Vercel partnership (skills.sh for 6M developers)
+- Key Stats: 18,000+ OpenClaw instances exposed, 15% malicious rate detected
+- Mission: Build trust infrastructure for AI agents, prevent supply chain attacks
+"""
+        condensed = ath_summary + "\n\n" + condensed
+    
+    return condensed
+
+
 async def process_user_query_with_neoclaw(user_input: str, context_docs: str) -> Dict:
     """
     Use GenClaw (via Claude) to intelligently process user query.
     
     Args:
         user_input: Natural language query from user
-        context_docs: Agent Trust Hub context documentation
+        context_docs: Agent Trust Hub context documentation (full 260KB)
         
     Returns:
         {
@@ -30,6 +62,9 @@ async def process_user_query_with_neoclaw(user_input: str, context_docs: str) ->
         }
     """
     
+    # Create condensed context for efficient prompting
+    condensed_context = create_condensed_context(context_docs)
+    
     prompt = f"""You are GenClaw, an AI agent expert helping Gen Digital find relevant social media conversations.
 
 USER INPUT:
@@ -38,8 +73,8 @@ USER INPUT:
 YOUR TASK:
 Analyze this query and provide intelligent guidance for Twitter search.
 
-CONTEXT ABOUT AGENT TRUST HUB:
-{context_docs[:2000]}
+CONTEXT ABOUT AGENT TRUST HUB & JEN:
+{condensed_context}
 
 RESPOND WITH JSON:
 {{
@@ -54,16 +89,16 @@ EXAMPLES:
 User: "Give me 10 top posts for AI Agent security"
 Response: {{
     "extracted_keywords": "AI agent security",
-    "search_strategy": "Focus on security vulnerabilities, supply chain risks, and trust issues in AI agents",
-    "relevance_criteria": "Posts discussing security nightmares, malicious skills, trust infrastructure, or OWASP LLM risks",
-    "engagement_context": "High engagement posts are more likely to reach decision-makers and create conversation opportunities"
+    "search_strategy": "Focus on security vulnerabilities, supply chain risks, and trust issues in AI agents. Look for discussions about malicious skills or trust infrastructure.",
+    "relevance_criteria": "Posts discussing security nightmares, malicious skills (15% malicious rate!), trust infrastructure, or OWASP LLM risks. Especially relevant when mentioning agent frameworks or skill marketplaces.",
+    "engagement_context": "High engagement posts reach decision-makers and create conversation opportunities for Agent Trust Hub products (Scanner, Sage, Marketplace)"
 }}
 
 User: "Show me discussions about OpenClaw"
 Response: {{
     "extracted_keywords": "OpenClaw",
     "search_strategy": "Find posts mentioning OpenClaw specifically - security concerns, usage, or integrations",
-    "relevance_criteria": "Direct mentions of OpenClaw, especially related to skills, security, or agent frameworks",
+    "relevance_criteria": "Direct mentions of OpenClaw, especially related to skills, security, or agent frameworks. Relevant to our 18K+ exposed instances statistic.",
     "engagement_context": "Any engagement level valuable - even low-engagement posts from developers matter"
 }}
 
@@ -140,11 +175,14 @@ async def generate_response_summary(
         user_query: Original user query
         found_posts: Posts discovered from Twitter
         analysis: Query analysis from process_user_query_with_neoclaw
-        context_docs: Agent Trust Hub context
+        context_docs: Agent Trust Hub context (full 260KB)
         
     Returns:
         Natural language summary explaining results and relevance
     """
+    
+    # Use condensed context for response generation too
+    condensed_context = create_condensed_context(context_docs)
     
     # Prepare post summaries
     post_summaries = []
@@ -169,13 +207,15 @@ FOUND {len(found_posts)} POSTS:
 {posts_text}
 
 AGENT TRUST HUB CONTEXT:
-{context_docs[:1500]}
+{condensed_context[:4000]}
 
 YOUR TASK:
 Write a brief (2-3 sentences) contextual response explaining:
 1. Why these posts are relevant to Gen Digital / Agent Trust Hub
 2. What engagement opportunities they present
 3. Which posts stand out most and why
+
+Reference specific Agent Trust Hub products (Scanner, Sage, Marketplace) or statistics (18K instances, 15% malicious) when relevant.
 
 TONE: Professional but conversational. Like a colleague giving strategic advice.
 
