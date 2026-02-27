@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.connection import init_clients
 from middleware.cors import get_cors_config
 from routers import (
+    agent_smart,
     comments,
     connections,
     dashboard,
@@ -53,6 +54,7 @@ app.include_router(connections.router)
 app.include_router(execution.router)
 app.include_router(neoclaw.router)
 app.include_router(personas.router)
+app.include_router(agent_smart.router)
 app.include_router(hubs.router)
 app.include_router(demo.router)
 app.include_router(discovery.router)
