@@ -62,6 +62,10 @@ export default function Sidebar({ currentRoute, onNavigate }: SidebarProps) {
             <span className="material-symbols-outlined text-[20px] overflow-hidden whitespace-nowrap text-[#a855f7]">library_books</span>
             Comment Library
           </div>
+          <div onClick={() => onNavigate('/learning')} className={navItemClass('/learning')}>
+            <span className="material-symbols-outlined text-[20px] text-[#10B981]">model_training</span>
+            AI Learning
+          </div>
           <div onClick={() => onNavigate('/review')} className={`${navItemClass('/review')} flex justify-between`}>
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-[20px] overflow-hidden whitespace-nowrap">rate_review</span>

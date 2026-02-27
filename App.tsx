@@ -8,8 +8,9 @@ import InstagramHub from './screens/InstagramHub';
 import XHub from './screens/XHub';
 import AIPersonality from './screens/AIPersonality';
 import CommentLibrary from './screens/CommentLibrary';
+import AILearning from './screens/AILearning';
 
-export type RoutePath = '/overview' | '/review' | '/settings' | '/hub/tiktok' | '/hub/instagram' | '/hub/x' | '/personas' | '/library';
+export type RoutePath = '/overview' | '/review' | '/settings' | '/hub/tiktok' | '/hub/instagram' | '/hub/x' | '/personas' | '/library' | '/learning';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<RoutePath>('/overview');
@@ -32,6 +33,8 @@ export default function App() {
         return <AIPersonality />;
       case '/library':
         return <CommentLibrary />;
+      case '/learning':
+        return <AILearning />;
       default:
         return <Overview onNavigate={setCurrentRoute} />;
     }
