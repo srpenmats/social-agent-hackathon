@@ -29,14 +29,13 @@ const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api/v1
 
 export default function SmartDiscoveryWidget() {
   const [query, setQuery] = useState('');
-  const [minEngagement, setMinEngagement] = useState(100);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SmartDiscoveryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleDiscover = async () => {
     if (!query.trim()) {
-      setError('Please enter search keywords');
+      setError('Please enter a description of what you\'re looking for');
       return;
     }
 
@@ -49,7 +48,6 @@ export default function SmartDiscoveryWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: query.trim(),
-          min_engagement: minEngagement,
           max_results: 10,
         }),
       });
@@ -124,40 +122,23 @@ export default function SmartDiscoveryWidget() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider">
-              Min Engagement
-            </label>
-            <input
-              type="number"
-              value={minEngagement}
-              onChange={(e) => setMinEngagement(parseInt(e.target.value) || 100)}
-              min="10"
-              step="10"
-              className="w-full px-4 py-2.5 bg-[#131828] border border-[#2D3748] rounded-lg text-white text-sm focus:outline-none focus:border-[#1DA1F2]/50 transition-colors"
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={handleDiscover}
-              disabled={loading}
-              className="w-full px-4 py-2.5 bg-[#1DA1F2] text-white rounded-lg text-sm font-medium hover:bg-[#1DA1F2]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
-                  Discovering...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[18px]">search</span>
-                  Discover & Analyze
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={handleDiscover}
+          disabled={loading}
+          className="w-full px-4 py-2.5 bg-[#1DA1F2] text-white rounded-lg text-sm font-medium hover:bg-[#1DA1F2]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <span className="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+              Discovering...
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-[18px]">search</span>
+              Discover & Analyze
+            </>
+          )}
+        </button>
 
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-sm flex items-center gap-2">
