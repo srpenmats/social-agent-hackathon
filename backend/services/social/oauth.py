@@ -80,9 +80,9 @@ def validate_token_expiry(
         }
 
     if isinstance(expires_raw, (int, float)):
-        expires_at = datetime.from timestamp(expires_raw, tz=timezone.utc)
+        expires_at = datetime.fromtimestamp(expires_raw, tz=timezone.utc)
     elif isinstance(expires_raw, str):
-        expires_at = datetime.from isoformat(expires_raw.replace("Z", "+00:00"))
+        expires_at = datetime.fromisoformat(expires_raw.replace("Z", "+00:00"))
     else:
         expires_at = expires_raw
 

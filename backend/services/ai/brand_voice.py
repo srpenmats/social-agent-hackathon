@@ -348,7 +348,7 @@ class BrandVoiceService:
                                 absolute_bans.append(cleaned)
 
         # Deduplicate
-        absolute_bans = list(dict.from keys(absolute_bans))
+        absolute_bans = list(dict.fromkeys(absolute_bans))
 
         return {
             "absolute": absolute_bans,

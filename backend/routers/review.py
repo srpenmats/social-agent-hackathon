@@ -69,7 +69,7 @@ async def review_queue(user: CurrentUser):
     wait_times = []
     for r in rows:
         if r.get("queued_at"):
-            queued = datetime.from isoformat(r["queued_at"].replace("Z", "+00:00"))
+            queued = datetime.fromisoformat(r["queued_at"].replace("Z", "+00:00"))
             wait_times.append((now - queued).total_seconds() / 60)
 
     avg_wait = sum(wait_times) / len(wait_times) if wait_times else 0.0
@@ -181,8 +181,8 @@ async def review_history(
     times = []
     for r in rows:
         if r.get("queued_at") and r.get("decided_at"):
-            q = datetime.from isoformat(r["queued_at"].replace("Z", "+00:00"))
-            d = datetime.from isoformat(r["decided_at"].replace("Z", "+00:00"))
+            q = datetime.fromisoformat(r["queued_at"].replace("Z", "+00:00"))
+            d = datetime.fromisoformat(r["decided_at"].replace("Z", "+00:00"))
             times.append((d - q).total_seconds())
 
     avg_time = sum(times) / len(times) if times else 0.0

@@ -172,11 +172,11 @@ class DiscoveryService:
         if discovered_at:
             if isinstance(discovered_at, str):
                 try:
-                    dt = datetime.from isoformat(discovered_at.replace("Z", "+00:00"))
+                    dt = datetime.fromisoformat(discovered_at.replace("Z", "+00:00"))
                 except ValueError:
                     dt = None
             elif isinstance(discovered_at, (int, float)):
-                dt = datetime.from timestamp(discovered_at, tz=timezone.utc)
+                dt = datetime.fromtimestamp(discovered_at, tz=timezone.utc)
             else:
                 dt = discovered_at
             if dt:

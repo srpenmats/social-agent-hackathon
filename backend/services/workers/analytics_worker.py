@@ -50,7 +50,7 @@ class AnalyticsWorker:
 
         if isinstance(posted_at_raw, str):
             try:
-                posted_at = datetime.from isoformat(posted_at_raw.replace("Z", "+00:00"))
+                posted_at = datetime.fromisoformat(posted_at_raw.replace("Z", "+00:00"))
             except ValueError:
                 return None
         else:
@@ -74,7 +74,7 @@ class AnalyticsWorker:
                     continue
                 if isinstance(checked_raw, str):
                     try:
-                        checked = datetime.from isoformat(checked_raw.replace("Z", "+00:00"))
+                        checked = datetime.fromisoformat(checked_raw.replace("Z", "+00:00"))
                     except ValueError:
                         continue
                 else:
