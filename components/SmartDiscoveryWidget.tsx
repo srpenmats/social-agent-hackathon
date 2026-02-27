@@ -8,6 +8,9 @@ interface PostAnalysis {
   likes: number;
   retweets: number;
   replies: number;
+  quotes?: number;
+  bookmarks?: number;
+  impressions?: number;
   relevance_score: number;
   engagement_potential: number;
   persona_recommendation: string;
@@ -190,11 +193,14 @@ export default function SmartDiscoveryWidget() {
                     </div>
 
                     {/* Author & Engagement */}
-                    <div className="flex items-center gap-4 mb-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-3 mb-2 text-xs text-gray-400 flex-wrap">
                       <span className="text-[#1DA1F2]">@{post.author}</span>
-                      <span>🔥 {post.likes} likes</span>
-                      <span>🔁 {post.retweets} RT</span>
-                      <span>💬 {post.replies} replies</span>
+                      <span>❤️ {post.likes.toLocaleString()}</span>
+                      <span>🔁 {post.retweets.toLocaleString()}</span>
+                      <span>💬 {post.replies.toLocaleString()}</span>
+                      {post.quotes > 0 && <span>💭 {post.quotes.toLocaleString()}</span>}
+                      {post.bookmarks > 0 && <span>🔖 {post.bookmarks.toLocaleString()}</span>}
+                      {post.impressions > 0 && <span>👁️ {post.impressions.toLocaleString()}</span>}
                     </div>
 
                     {/* Post Text */}

@@ -66,6 +66,9 @@ class PostAnalysis(BaseModel):
     likes: int
     retweets: int
     replies: int
+    quotes: int = 0
+    bookmarks: int = 0
+    impressions: int = 0
     
     # Analysis fields
     relevance_score: float = Field(..., ge=0, le=10, description="How relevant to Agent Trust Hub (0-10)")
@@ -280,6 +283,9 @@ async def analyze_post_for_recommendation(post: dict) -> PostAnalysis:
         likes=likes,
         retweets=retweets,
         replies=replies,
+        quotes=post.get("quotes", 0),
+        bookmarks=post.get("bookmarks", 0),
+        impressions=post.get("impressions", 0),
         relevance_score=relevance_score,
         engagement_potential=engagement_score,
         persona_recommendation=persona,
