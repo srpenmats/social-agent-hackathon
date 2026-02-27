@@ -12,6 +12,7 @@ from routers import (
     db_init,
     demo,
     discovery,
+    discovery_enhanced,
     execution,
     hubs,
     neoclaw,
@@ -50,6 +51,7 @@ app.include_router(personas.router)
 app.include_router(hubs.router)
 app.include_router(demo.router)
 app.include_router(discovery.router)
+app.include_router(discovery_enhanced.router)
 app.include_router(db_init.router)
 
 
