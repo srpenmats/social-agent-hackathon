@@ -65,6 +65,7 @@ class SmartDiscoveryRequest(BaseModel):
     """User input for smart discovery."""
     query: str = Field(..., description="Context describing what posts to find", min_length=3, max_length=500)
     max_results: Optional[int] = Field(10, description="Maximum posts to analyze", ge=1, le=25)
+    generate_suggestions: Optional[bool] = Field(False, description="Generate suggested responses for top posts")
 
 
 class PostAnalysis(BaseModel):
@@ -88,6 +89,9 @@ class PostAnalysis(BaseModel):
     angle_summary: str = Field(..., description="What angle would we take?")
     recommendation_score: float = Field(..., ge=0, le=10, description="Overall recommendation (0-10)")
     reasoning: str = Field(..., description="Why this score?")
+    
+    # Suggested response (optional)
+    suggested_comment: Optional[dict] = Field(None, description="AI-generated suggested response")
 
 
 class SmartDiscoveryResponse(BaseModel):
@@ -182,6 +186,33 @@ async def smart_discovery(request: SmartDiscoveryRequest) -> SmartDiscoveryRespo
     
     # STEP 5: Sort by recommendation_score
     analyzed_posts.sort(key=lambda x: x.recommendation_score, reverse=True)
+    
+    # STEP 5.5: Generate suggested responses for top posts (if requested)
+    if request.generate_suggestions:
+        from services.response_generator import generate_suggested_response
+        
+        logger.info("Generating suggested responses for top 3 posts...")
+        for i, post_analysis in enumerate(analyzed_posts[:3]):  # Only top 3
+            try:
+                suggestion = await generate_suggested_response(
+                    post={
+                        "author": post_analysis.author,
+                        "text": post_analysis.text,
+                        "likes": post_analysis.likes,
+                        "retweets": post_analysis.retweets
+                    },
+                    persona=post_analysis.persona_recommendation,
+                    context_docs=AGENT_TRUST_HUB_CONTEXT
+                )
+                
+                if suggestion and suggestion.get("confidence", 0) >= 0.6:
+                    post_analysis.suggested_comment = suggestion
+                    logger.info(f"Generated suggestion for post {i+1}: confidence={suggestion.get('confidence')}")
+                else:
+                    logger.warning(f"Low confidence suggestion for post {i+1}, skipping")
+                    
+            except Exception as e:
+                logger.warning(f"Failed to generate suggestion for post {i+1}: {e}")
     
     # STEP 6: GenClaw generates contextual summary
     try:
