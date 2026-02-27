@@ -9,6 +9,7 @@ from routers import (
     comments,
     connections,
     dashboard,
+    db_init,
     demo,
     discovery,
     execution,
@@ -49,6 +50,7 @@ app.include_router(personas.router)
 app.include_router(hubs.router)
 app.include_router(demo.router)
 app.include_router(discovery.router)
+app.include_router(db_init.router)
 
 
 @app.get("/api/v1/health")
