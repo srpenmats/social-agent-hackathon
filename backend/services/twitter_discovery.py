@@ -237,3 +237,7 @@ class TwitterDiscoveryService:
             "stored": stored_count,
             "tweets": tweets[:5]
         }
+
+
+def get_twitter_service() -> TwitterDiscoveryService:
+    return TwitterDiscoveryService()
