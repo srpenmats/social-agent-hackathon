@@ -19,6 +19,7 @@ from routers import (
     neoclaw,
     personas,
     populate,
+    populate_engagements,
     quickfix,
     review,
     settings,
@@ -61,6 +62,7 @@ app.include_router(db_seed.router)
 app.include_router(quickfix.router)
 app.include_router(twitter_live.router)
 app.include_router(populate.router)
+app.include_router(populate_engagements.router)
 
 
 @app.get("/api/v1/health")
