@@ -151,7 +151,7 @@ async def approve_and_post(post_id: str, request: dict):
     """
     Approve comment and post to Twitter.
     
-    Updates status to "approved" and calls Twitter API to post.
+    Updates status to "approved", marks as posted, and tracks response.
     """
     
     db = get_supabase_admin()
@@ -173,12 +173,16 @@ async def approve_and_post(post_id: str, request: dict):
         try:
             reply_result = await twitter.post_reply(tweet_id, comment)
             
-            # Update status to approved
+            # Update with successful response tracking
             db.table("review_posts").update({
                 "status": "approved",
                 "final_comment": comment,
+                "posted": True,
                 "posted_at": datetime.now(timezone.utc).isoformat(),
-                "posted_url": reply_result.get("url")
+                "posted_url": reply_result.get("url"),
+                "responded_at": datetime.now(timezone.utc).isoformat(),
+                "response_text": comment,
+                "response_url": reply_result.get("url")
             }).eq("id", post_id).execute()
             
             return {
@@ -191,6 +195,7 @@ async def approve_and_post(post_id: str, request: dict):
             # Update status but mark as failed
             db.table("review_posts").update({
                 "status": "failed",
+                "posted": False,
                 "error": str(twitter_error)
             }).eq("id", post_id).execute()
             
@@ -220,4 +225,29 @@ async def remove_from_queue(post_id: str):
     
     except Exception as e:
         logger.error(f"Failed to remove post: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/v1/jen/response-queue")
+async def get_response_queue(limit: int = 50):
+    """
+    Get posts we've responded to (Response Queue).
+    
+    Shows history of approved and posted comments.
+    """
+    
+    db = get_supabase_admin()
+    
+    try:
+        result = db.table("review_posts")\
+            .select("*")\
+            .eq("posted", True)\
+            .order("responded_at", desc=True)\
+            .limit(limit)\
+            .execute()
+        
+        return {"posts": result.data, "total": len(result.data)}
+    
+    except Exception as e:
+        logger.error(f"Failed to get response queue: {e}")
         raise HTTPException(status_code=500, detail=str(e))

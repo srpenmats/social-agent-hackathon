@@ -35,6 +35,14 @@ export default function XHub() {
   const fetchData = useCallback(async () => {
     try {
       const result = await HubAPI.getStats('x');
+      
+      // Also fetch response queue
+      const responseQueueRes = await fetch(`${API_BASE}/jen/response-queue?limit=10`);
+      const responseQueue = await responseQueueRes.json();
+      
+      // Merge response queue into data.drafts for display
+      result.drafts = responseQueue.posts || [];
+      
       setData(result);
       setError(null);
     } catch (err) {
@@ -205,22 +213,22 @@ export default function XHub() {
             </div>
            </div>
 
-           {/* Drafts / Pending Review */}
+           {/* Response Queue (formerly High-Risk Drafts) */}
            <div className="bg-[#131828] border border-[#1F2937] rounded-xl flex flex-col overflow-hidden">
              <div className="p-4 border-b border-[#1F2937] flex justify-between items-center bg-[#1E2538]/50">
               <h3 className="font-semibold text-white flex items-center gap-2">
-                 <span className="material-symbols-outlined text-yellow-500 text-[18px]">warning</span>
-                 High-Risk Drafts
+                 <span className="material-symbols-outlined text-green-500 text-[18px]">check_circle</span>
+                 Response Queue
               </h3>
               {data.drafts && data.drafts.length > 0 && (
-                <button className="text-xs bg-[#1DA1F2]/20 text-[#1DA1F2] px-2 py-1 rounded font-medium">Review All ({data.drafts.length})</button>
+                <button className="text-xs bg-[#10B981]/20 text-[#10B981] px-2 py-1 rounded font-medium">View All ({data.drafts.length})</button>
               )}
             </div>
             <div className="flex-1 p-0 overflow-y-auto scroller divide-y divide-[#2D3748]">
               {data.drafts && data.drafts.length > 0 ? data.drafts.map((item: any, i: number) => (
                 <div key={item.id ?? i} className="p-5 bg-[#0B0F1A] hover:bg-[#131828] transition-colors">
                   <div className="text-xs text-gray-500 mb-2 flex items-center gap-1 flex-wrap">
-                    <span>Replying to</span>
+                    <span>Responded to</span>
                     {item.tweet_url ? (
                       <a href={item.tweet_url} target="_blank" rel="noopener noreferrer" className="text-[#1DA1F2] hover:underline inline-flex items-center gap-1">
                         {item.user}
@@ -229,9 +237,9 @@ export default function XHub() {
                     ) : (
                       <span className="text-[#1DA1F2]">{item.user}</span>
                     )}
-                    {item.risk_score != null && (
-                      <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
-                        Risk: {item.risk_score}
+                    {item.responded_at && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">
+                        ✓ Posted
                       </span>
                     )}
                   </div>
