@@ -1,8 +1,21 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 
-[build.nixpacks]
-phase = "setup"
-
-[build.nixpacks.plan]
+[build.nixpacksPlan]
 providers = ["python"]
+
+[[build.nixpacksPlan.phases.setup]]
+name = "python"
+nixPkgs = ["python310", "python310Packages.pip"]
+
+[[build.nixpacksPlan.phases.install]]
+cmds = ["cd backend && pip install -r requirements.txt"]
+
+[[build.nixpacksPlan.phases.start]]
+cmd = "cd backend && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"
+
+[deploy]
+startCommand = "cd backend && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
