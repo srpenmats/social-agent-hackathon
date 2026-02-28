@@ -49,14 +49,67 @@ export default function SmartDiscoveryWidget() {
 
     setLoading(true);
     setError(null);
+    setResults(null);
 
     try {
-      const data: SmartDiscoveryResponse = await HubAPI.smartDiscovery(query.trim(), 10);
-      setResults(data);
+      // Submit query to async queue
+      const submitResponse = await fetch('/api/v1/discovery/smart-query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query.trim(), max_results: 10 })
+      });
+      
+      if (!submitResponse.ok) throw new Error('Failed to submit query');
+      
+      const { query_id } = await submitResponse.json();
+      
+      // Poll for results every 2 seconds
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusResponse = await fetch(`/api/v1/discovery/status/${query_id}`);
+          const statusData = await statusResponse.json();
+          
+          if (statusData.status === 'complete') {
+            clearInterval(pollInterval);
+            
+            // Transform results to match SmartDiscoveryResponse format
+            const neoclawResults = statusData.results;
+            setResults({
+              query: neoclawResults.original_query,
+              found_posts: neoclawResults.found_posts,
+              analyzed_posts: neoclawResults.analyzed_posts,
+              recommendations: neoclawResults.recommendations,
+              top_post: neoclawResults.recommendations[0] || null,
+              extracted_keywords: neoclawResults.search_strategy,
+              search_strategy: neoclawResults.search_strategy,
+              context_summary: neoclawResults.context_summary
+            });
+            
+            setLoading(false);
+          } else if (statusData.status === 'error') {
+            clearInterval(pollInterval);
+            setError(statusData.error || 'Processing failed');
+            setLoading(false);
+          }
+          // Otherwise keep polling (status is 'queued' or 'processing')
+        } catch (err) {
+          clearInterval(pollInterval);
+          setError('Failed to check status');
+          setLoading(false);
+        }
+      }, 2000); // Poll every 2 seconds
+      
+      // Timeout after 2 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (loading) {
+          setError('Request timed out. Please try again.');
+          setLoading(false);
+        }
+      }, 120000);
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to discover posts');
-      setResults(null);
-    } finally {
       setLoading(false);
     }
   };

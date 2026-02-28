@@ -23,6 +23,7 @@ from routers import (
     jen,
     migrations,
     neoclaw,
+    neoclaw_discovery,
     personas,
     platform_connection,
     platform_direct,
@@ -86,6 +87,7 @@ app.include_router(twitter_live.router)
 app.include_router(populate.router)
 app.include_router(populate_engagements.router)
 app.include_router(smart_discovery.router)
+app.include_router(neoclaw_discovery.router)
 app.include_router(feedback.router)
 
 
