@@ -490,7 +490,7 @@ class TwitterService:
         )
         return {"success": True, "tweet_id": reply_data.get("id")}
 
-    async def search_tweets(self, query: str, max_results: int = 10) -> list[dict]:
+    async def search_tweets(self, query: str, max_results: int = 50) -> list[dict]:
         """Search recent tweets via API v2."""
         data = await self._request(
             "GET", "/2/tweets/search/recent",
@@ -520,7 +520,7 @@ class TwitterService:
             "GET", f"/2/users/{user_id}/tweets",
             rate_group="tweets_read",
             params={
-                "max_results": 10,
+                "max_results": 50,
                 "tweet.fields": "created_at,public_metrics,conversation_id",
             },
         )
